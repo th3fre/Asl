@@ -6,195 +6,166 @@
     <title>ASL Tunnel - Host Checker Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --app-green: #2d5a3f; 
-            --app-light-green: #4caf50; 
-            --bg-dark: #0a0a0a; 
-            --card-bg: #1c2128; 
-            --border: #30363d;
-            --text-gray: #8b949e;
-        }
-
-        body {
-            margin: 0; padding: 0;
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .app-bar {
-            background-color: var(--app-green);
-            padding: 12px 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.9rem; font-weight: bold;
-            position: sticky; top: 0; z-index: 1000;
-        }
-
-        .lang-switch {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid white; color: white;
-            padding: 5px 12px; border-radius: 20px;
-            cursor: pointer; font-size: 0.75rem;
-        }
-
-        .container {
-            max-width: 500px; margin: 0 auto; padding: 20px; text-align: center;
-        }
-
-        .main-card {
-            background-color: var(--card-bg);
-            border-radius: 25px; padding: 30px 20px;
-            border: 1px solid var(--border); margin-bottom: 20px;
-        }
-
-        input {
-            width: 100%; padding: 15px; box-sizing: border-box;
-            border-radius: 12px; border: 1px solid var(--border);
-            background: #0d1117; color: white;
-            margin-bottom: 15px; text-align: center;
-            font-family: monospace; outline: none; font-size: 1rem;
-        }
-
-        .action-btn {
-            background: linear-gradient(180deg, #4caf50, #2e7d32);
-            color: white; border: none; width: 100%; padding: 16px;
-            border-radius: 50px; font-weight: bold; font-size: 1.1rem;
-            cursor: pointer; transition: 0.3s;
-        }
-
+        :root { --app-green: #2d5a3f; --app-light-green: #4caf50; --bg-dark: #0a0a0a; --card-bg: #1c2128; --border: #30363d; --text-gray: #8b949e; }
+        body { margin: 0; padding: 0; background-color: var(--bg-dark); color: white; font-family: 'Cairo', sans-serif; }
+        .app-bar { background-color: var(--app-green); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: bold; }
+        .container { max-width: 500px; margin: 20px auto; padding: 0 15px; text-align: center; }
+        .main-card { background-color: var(--card-bg); border-radius: 25px; padding: 30px 20px; border: 1px solid var(--border); }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: #0d1117; color: white; margin-bottom: 15px; text-align: center; outline: none; }
+        .action-btn { background: linear-gradient(180deg, #4caf50, #2e7d32); color: white; border: none; width: 100%; padding: 16px; border-radius: 50px; font-weight: bold; cursor: pointer; }
         .result-box { margin-top: 25px; display: none; }
-
-        .info-card {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            padding: 15px; border-radius: 18px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        .info-card h3 { color: var(--app-light-green); margin: 0; font-size: 0.8rem; text-transform: uppercase; text-align: right; }
-        .info-card p { color: white; margin: 6px 0 0 0; font-size: 1rem; font-family: monospace; text-align: right; }
-
-        .copy-btn {
-            background: var(--app-green); color: white; border: none;
-            padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; cursor: pointer;
-        }
-
-        .loader {
-            display: none; margin: 20px auto;
-            border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--app-light-green);
-            border-radius: 50%; width: 35px; height: 35px;
-            animation: spin 1s linear infinite;
-        }
-
+        .info-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .info-card h3 { color: var(--app-light-green); margin: 0; font-size: 0.8rem; text-transform: uppercase; }
+        .info-card p { color: white; margin: 6px 0 0 0; font-size: 1rem; font-family: monospace; }
+        .loader { display: none; margin: 20px auto; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--app-light-green); border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        footer { margin-top: 20px; font-size: 0.8rem; color: var(--text-gray); }
+        
+/* Footer Fixed at the bottom */
+        footer {
+            background-color: #161b22;
+            padding: 15px 0; /* تقليل الحشو ليكون أنيقاً */
+            text-align: center;
+            border-top: 1px solid var(--border);
+            position: fixed; /* جعل الفوتر ثابتاً */
+            bottom: 0;      /* في أسفل الشاشة تماماً */
+            left: 0;
+            width: 100%;    /* ليمتد على كامل العرض */
+            z-index: 1000;  /* ليكون فوق كل المحتوى */
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3); /* ظل خفيف لتمييزه */
+        }
+
+        .footer-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+
+        /* تعديل المسافات للروابط لتناسب الوضع الثابت */
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.75rem; /* تصغير الخط قليلاً */
+            background: #21262d;
+            padding: 6px 12px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .copyright {
+            font-size: 0.7rem;
+            color: #8b949e;
+            margin-top: 5px;
+        }
+
+        /* إضافة مسافة في أسفل الحاوية الرئيسية حتى لا يغطي الفوتر المحتوى الأخير */
+        .container {
+            margin-bottom: 120px; 
+        }
+        
+        
     </style>
 </head>
 <body>
 
-    <div class="app-bar">
-        <span id="nav-title">ASL TUNNEL VPN - TOOLS</span>
-        <button class="lang-switch" onclick="toggleLang()" id="langBtn">English</button>
-    </div>
+    <div class="app-bar"><span>ASL TUNNEL VPN - TOOLS</span></div>
 
     <div class="container">
         <div class="main-card">
-            <h2 id="title">فحص Host السيرفر</h2>
-            <p id="subtitle" style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 25px;">استخرج الـ IP ومعلومات الموقع الجغرافي</p>
+            <h2>فحص Host السيرفر</h2>
+            <p style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 25px;">استخرج الـ IP ومعلومات المزود</p>
             
-            <input type="text" id="hostInput" placeholder="أدخل الدومين أو الـ IP" autocomplete="off">
-            
-            <button class="action-btn" id="checkBtn" onclick="checkHost()">افحص الآن</button>
+            <input type="text" id="hostInput" placeholder="أدخل الدومين (مثلاً google.com)" autocomplete="off">
+            <button class="action-btn" onclick="checkHost()">افحص الآن</button>
 
             <div id="loader" class="loader"></div>
 
             <div id="resultBox" class="result-box">
-                <div class="info-card">
-                    <div>
-                        <h3 id="label-ip">IP Address</h3>
-                        <p id="res-ip">-</p>
-                    </div>
-                    <button class="copy-btn" id="copyBtn" onclick="copyIP()">نسخ</button>
-                </div>
-                <div class="info-card">
-                    <div>
-                        <h3 id="label-country">Country / الدولة</h3>
-                        <p id="res-country">-</p>
-                    </div>
-                </div>
-                <div class="info-card">
-                    <div>
-                        <h3 id="label-isp">ISP / المزود</h3>
-                        <p id="res-isp">-</p>
-                    </div>
-                </div>
+                <div class="info-card"><div><h3>IP Address</h3><p id="res-ip">-</p></div></div>
+                <div class="info-card"><div><h3>Country / الدولة</h3><p id="res-country">-</p></div></div>
+                <div class="info-card"><div><h3>ISP / المزود</h3><p id="res-isp">-</p></div></div>
             </div>
         </div>
-        <div style="font-size: 0.8rem; color: var(--text-gray);">© 2026 ASL TUNNEL OFFICIAL TOOLS</div>
+        
+        
+<div class="container">
     </div>
 
+<footer>
+    <div class="footer-container">
+        <div class="footer-links">
+            <a href="https://t.me/ASLTUNNEL" target="_blank">
+                <span>📢</span> قناة التليجرام
+            </a>
+            <a href="https://asltunnel.com" target="_blank">
+                <span>🌐</span> الصفحة الرئيسية 
+            </a>
+        </div>
+        <div class="copyright">
+            جميع الحقوق محفوظة © 2026 <b>ASL TUNNEL VPN</b>
+        </div>
+    </div>
+</footer>
+    
+    
+
     <script>
-        let currentLang = 'ar';
-        const translations = {
-            ar: { nav: "ASL TUNNEL VPN", lang: "English", title: "فحص Host السيرفر", subtitle: "استخرج الـ IP ومعلومات الموقع الجغرافي", placeholder: "أدخل الدومين أو الـ IP", btn: "افحص الآن", copy: "نسخ", copied: "تم!", errEmpty: "يرجى إدخال عنوان", errFail: "تعذر العثور على بيانات", ip: "عنوان الـ IP", country: "الدولة", isp: "مزود الخدمة" },
-            en: { nav: "ASL TUNNEL VPN", lang: "العربية", title: "Host Checker", subtitle: "Extract IP and geolocation info", placeholder: "Enter domain or IP", btn: "Check Now", copy: "Copy", copied: "Done!", errEmpty: "Please enter a host", errFail: "Could not fetch data", ip: "IP Address", country: "Country", isp: "ISP Provider" }
-        };
-
-        function toggleLang() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            document.getElementById('htmlTag').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            updateUI();
-        }
-
-        function updateUI() {
-            const t = translations[currentLang];
-            document.getElementById('nav-title').innerText = t.nav;
-            document.getElementById('langBtn').innerText = t.lang;
-            document.getElementById('title').innerText = t.title;
-            document.getElementById('subtitle').innerText = t.subtitle;
-            document.getElementById('hostInput').placeholder = t.placeholder;
-            document.getElementById('checkBtn').innerText = t.btn;
-            document.getElementById('copyBtn').innerText = t.copy;
-            document.getElementById('label-ip').innerText = t.ip;
-            document.getElementById('label-country').innerText = t.country;
-            document.getElementById('label-isp').innerText = t.isp;
-        }
-
         async function checkHost() {
             const host = document.getElementById('hostInput').value.trim();
             const resBox = document.getElementById('resultBox');
             const loader = document.getElementById('loader');
-            const t = translations[currentLang];
 
-            if (!host) { alert(t.errEmpty); return; }
+            if (!host) { alert("يرجى إدخال عنوان أولاً"); return; }
 
             loader.style.display = "block";
             resBox.style.display = "none";
 
+            // المحاولة الأولى: استخدام Cloudflare Worker Proxy أو IP-API عبر JSONP/CORS
             try {
-                // استخدام HTTPS API ليعمل على المواقع المرفوعة
-                const response = await fetch(`https://ipapi.co/${host}/json/`);
-                const data = await response.json();
+                // نستخدم AllOrigins لتجاوز حظر CORS و Mixed Content تماماً
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('http://ip-api.com/json/' + host)}`);
+                const json = await response.json();
+                const data = JSON.parse(json.contents);
 
-                if (data.error) {
-                    alert(t.errFail);
+                if (data.status === "success") {
+                    displayData(data.query, data.country, data.isp);
                 } else {
-                    document.getElementById('res-ip').innerText = data.ip || host;
-                    document.getElementById('res-country').innerText = data.country_name || "-";
-                    document.getElementById('res-isp').innerText = data.org || "-";
-                    resBox.style.display = "block";
+                    throw new Error("API 1 Failed");
                 }
-            } catch (error) {
-                alert(t.errFail);
+            } catch (err) {
+                // المحاولة الثانية: استخدام مزود احتياطي (ipapi.co)
+                try {
+                    const response = await fetch(`https://ipapi.co/${host}/json/`);
+                    const data = await response.json();
+                    if (!data.error) {
+                        displayData(data.ip, data.country_name, data.org);
+                    } else {
+                        alert("تعذر العثور على بيانات لهذا العنوان");
+                    }
+                } catch (e) {
+                    alert("خطأ في الاتصال بالخادم، جرب لاحقاً");
+                }
             } finally {
                 loader.style.display = "none";
             }
         }
 
-        function copyIP() {
-            const ip = document.getElementById('res-ip').innerText;
-            navigator.clipboard.writeText(ip);
-            const btn = document.getElementById('copyBtn');
-            btn.innerText = translations[currentLang].copied;
-            setTimeout(() => btn.innerText = translations[currentLang].copy, 2000);
+        function displayData(ip, country, isp) {
+            document.getElementById('res-ip').innerText = ip;
+            document.getElementById('res-country').innerText = country;
+            document.getElementById('res-isp').innerText = isp;
+            document.getElementById('resultBox').style.display = "block";
         }
     </script>
 </body>
