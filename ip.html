@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASL Tunnel - Host Checker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>ASL Tunnel - Host Checker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --app-green: #2d5a3f; 
@@ -19,7 +19,7 @@
             margin: 0; padding: 0;
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Cairo', 'Roboto', sans-serif;
+            font-family: 'Cairo', sans-serif;
         }
 
         .app-bar {
@@ -55,16 +55,12 @@
             font-family: monospace; outline: none; font-size: 1rem;
         }
 
-        input:focus { border-color: var(--app-light-green); }
-
         .action-btn {
             background: linear-gradient(180deg, #4caf50, #2e7d32);
             color: white; border: none; width: 100%; padding: 16px;
             border-radius: 50px; font-weight: bold; font-size: 1.1rem;
             cursor: pointer; transition: 0.3s;
         }
-
-        .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
         .result-box { margin-top: 25px; display: none; }
 
@@ -74,17 +70,12 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        .info-card div { flex: 1; }
-        [dir="rtl"] .info-card div { text-align: right; }
-        [dir="ltr"] .info-card div { text-align: left; }
-
-        .info-card h3 { color: var(--app-light-green); margin: 0; font-size: 0.8rem; text-transform: uppercase; }
-        .info-card p { color: white; margin: 6px 0 0 0; font-size: 1rem; font-family: monospace; word-break: break-all; }
+        .info-card h3 { color: var(--app-light-green); margin: 0; font-size: 0.8rem; text-transform: uppercase; text-align: right; }
+        .info-card p { color: white; margin: 6px 0 0 0; font-size: 1rem; font-family: monospace; text-align: right; }
 
         .copy-btn {
             background: var(--app-green); color: white; border: none;
             padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; cursor: pointer;
-            margin-right: 10px;
         }
 
         .loader {
@@ -106,10 +97,10 @@
 
     <div class="container">
         <div class="main-card">
-            <h2 id="title" style="margin: 0 0 10px 0;">فحص Host السيرفر</h2>
+            <h2 id="title">فحص Host السيرفر</h2>
             <p id="subtitle" style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 25px;">استخرج الـ IP ومعلومات الموقع الجغرافي</p>
             
-            <input type="text" id="hostInput" placeholder="example.com" autocomplete="off">
+            <input type="text" id="hostInput" placeholder="أدخل الدومين أو الـ IP" autocomplete="off">
             
             <button class="action-btn" id="checkBtn" onclick="checkHost()">افحص الآن</button>
 
@@ -143,8 +134,8 @@
     <script>
         let currentLang = 'ar';
         const translations = {
-            ar: { nav: "ASL TUNNEL VPN", lang: "English", title: "فحص Host السيرفر", subtitle: "استخرج الـ IP ومعلومات الموقع الجغرافي", placeholder: "أدخل الدومين أو الـ IP", btn: "افحص الآن", copy: "نسخ", copied: "تم!", errEmpty: "يرجى إدخال عنوان", errFail: "تعذر العثور على بيانات لهذا العنوان", ip: "عنوان الـ IP", country: "الدولة", isp: "مزود الخدمة" },
-            en: { nav: "ASL TUNNEL VPN", lang: "العربية", title: "Host Checker", subtitle: "Extract IP and geolocation info", placeholder: "Enter domain or IP", btn: "Check Now", copy: "Copy", copied: "Done!", errEmpty: "Please enter a host", errFail: "Could not fetch data for this host", ip: "IP Address", country: "Country", isp: "ISP Provider" }
+            ar: { nav: "ASL TUNNEL VPN", lang: "English", title: "فحص Host السيرفر", subtitle: "استخرج الـ IP ومعلومات الموقع الجغرافي", placeholder: "أدخل الدومين أو الـ IP", btn: "افحص الآن", copy: "نسخ", copied: "تم!", errEmpty: "يرجى إدخال عنوان", errFail: "تعذر العثور على بيانات", ip: "عنوان الـ IP", country: "الدولة", isp: "مزود الخدمة" },
+            en: { nav: "ASL TUNNEL VPN", lang: "العربية", title: "Host Checker", subtitle: "Extract IP and geolocation info", placeholder: "Enter domain or IP", btn: "Check Now", copy: "Copy", copied: "Done!", errEmpty: "Please enter a host", errFail: "Could not fetch data", ip: "IP Address", country: "Country", isp: "ISP Provider" }
         };
 
         function toggleLang() {
@@ -179,16 +170,16 @@
             resBox.style.display = "none";
 
             try {
-                // استخدام API مباشر يدعم الـ JSONP أو الـ CORS المفتوح
-                const response = await fetch(`http://ip-api.com/json/${host}?fields=status,message,country,isp,query`);
+                // استخدام HTTPS API ليعمل على المواقع المرفوعة
+                const response = await fetch(`https://ipapi.co/${host}/json/`);
                 const data = await response.json();
 
-                if (data.status === "fail") {
+                if (data.error) {
                     alert(t.errFail);
                 } else {
-                    document.getElementById('res-ip').innerText = data.query;
-                    document.getElementById('res-country').innerText = data.country;
-                    document.getElementById('res-isp').innerText = data.isp;
+                    document.getElementById('res-ip').innerText = data.ip || host;
+                    document.getElementById('res-country').innerText = data.country_name || "-";
+                    document.getElementById('res-isp').innerText = data.org || "-";
                     resBox.style.display = "block";
                 }
             } catch (error) {
@@ -202,9 +193,8 @@
             const ip = document.getElementById('res-ip').innerText;
             navigator.clipboard.writeText(ip);
             const btn = document.getElementById('copyBtn');
-            const old = btn.innerText;
             btn.innerText = translations[currentLang].copied;
-            setTimeout(() => btn.innerText = old, 2000);
+            setTimeout(() => btn.innerText = translations[currentLang].copy, 2000);
         }
     </script>
 </body>
