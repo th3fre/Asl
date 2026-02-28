@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL TUNNEL VPN - Official</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --app-green: #2d5a3f; 
+            --app-light-green: #4caf50; 
+            --bg-dark: #0a0a0a; 
+            --card-bg: #161b22; 
+            --text-gray: #8b949e;
+            --white: #ffffff;
+            --border: #30363d;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--white);
+            font-family: 'Cairo', 'Poppins', sans-serif;
+        }
+
+        /* تصغير البار العلوي */
+        .app-bar {
+            background-color: var(--app-green);
+            padding: 8px 15px; /* تقليل الحشو لتصغير الحجم */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0; z-index: 1000;
+        }
+
+        .app-bar h2 { font-size: 1rem; margin: 0; } /* تصغير حجم الخط */
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white; padding: 4px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 0.75rem;
+        }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+
+        .main-card {
+            background-color: #1c2128;
+            border-radius: 28px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+        }
+
+        .app-logo {
+            width: 80px; height: 80px;
+            border-radius: 18px;
+            border: 2px solid var(--app-light-green);
+            margin-bottom: 10px;
+        }
+
+        .action-btn {
+            background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%);
+            color: white; width: 100%; padding: 16px;
+            border-radius: 50px; border: none;
+            font-size: 1.1rem; font-weight: bold;
+            margin-top: 15px; cursor: pointer;
+            display: block; text-decoration: none;
+        }
+
+        .screenshots {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            margin: 25px 0;
+            padding-bottom: 10px;
+        }
+        .screenshots img { height: 350px; border-radius: 15px; border: 1px solid var(--border); }
+
+        .info-section { margin-top: 20px; display: grid; gap: 15px; }
+
+        .info-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .info-icon { font-size: 1.6rem; color: var(--app-light-green); }
+
+        .info-text h3 { margin: 0 0 5px 0; font-size: 1rem; color: var(--app-light-green); }
+        .info-text p { margin: 0; color: var(--text-gray); font-size: 0.85rem; line-height: 1.4; }
+
+        .telegram-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        body.en { direction: ltr; }
+    </style>
+</head>
+<body>
+
+    <div class="app-bar">
+        <h2 id="nav-title">ASL TUNNEL VPN</h2>
+        <button class="lang-btn" onclick="toggleLanguage()">English</button>
+    </div>
+
+    <div class="container">
+        <div class="main-card">
+            <img src="https://lh3.googleusercontent.com/IUk9rvIoD1HQ643b3naQRnurDXVXh3JY1vdJC1JHyKoBt7DQiH8-8SMDMwSvQ7lGU4SajawgDVP1kk5UCalj3S8=h100" alt="Logo" class="app-logo">
+            <h1 id="hero-title" style="margin: 0; font-size: 1.4rem;">ASL Tunnel Pro</h1>
+            <p id="hero-desc" style="color: var(--text-gray); font-size: 0.9rem; margin-top: 5px;">تشفير آمن وحرية إنترنت مطلقة</p>
+            
+            <a href="https://play.google.com/store/apps/details?id=com.asltunnel.vpn" class="action-btn" id="btn-dl">تحميل التطبيق الآن</a>
+            
+            <a href="https://t.me/ASLTUNNEL" class="telegram-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" width="18" alt="TG">
+                <span id="tg-txt">انضم إلينا على تلغرام</span>
+            </a>
+        </div>
+
+        <h3 id="gallery-title" style="border-right: 4px solid var(--app-light-green); padding-right: 10px; font-size: 1.1rem;">صور من داخل التطبيق</h3>
+        <div class="screenshots">
+            <img src="https://play-lh.googleusercontent.com/hnhUmuLpLsTCFpW3j1L0WWsLevm6EkbLkI5pyVH5T-lrTkcxrn6hzroOMqjplEJNdWaULlagWRjYLa2oSGLhjxE=w1052-h592-rw" alt="Screen 1">
+            <img src="https://play-lh.googleusercontent.com/dJyUChRRWgguWl2i5u5WhMxw3JjZdjH9y5BfyuPnbXFSUj-mbcE5BNLlv4VPP1i0-DH6oxbW_xyq6rTMt8HuOQ=w1052-h592-rw" alt="Screen 2">
+            <img src="https://play-lh.googleusercontent.com/H0Lc-n51Z_3aG5GdnDfJRYwCZm4jSUNBg04EVbY7nziDwXmKBKSjS18XKIBvYOocK9XvEqqfS8FE0rYWVm1h=w1052-h592-rw" alt="Screen 3">
+        </div>
+
+        <div class="info-section">
+            <div class="info-item">
+                <div class="info-icon">⚙️</div>
+                <div class="info-text">
+                    <h3 id="desc-1-t">البروتوكولات المدعومة</h3>
+                    <p id="desc-1-p">يدعم التطبيق SSH, TLS, V2Ray, SlowDNS و UDP لتخطي أصعب جدران الحماية بنجاح.</p>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">🔐</div>
+                <div class="info-text">
+                    <h3 id="desc-2-t">تشفير عالي الأمان</h3>
+                    <p id="desc-2-p">تشفير AES-256 العسكري يحمي بياناتك من أي تتبع أو مراقبة من قبل مزود الخدمة.</p>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon">🚀</div>
+                <div class="info-text">
+                    <h3 id="desc-3-t">سرعة فائقة (Turbo)</h3>
+                    <p id="desc-3-p">سيرفرات فائقة السرعة تضمن لك تجربة تصفح وألعاب سلسة جداً دون انقطاع.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer style="text-align: center; padding: 30px 0; color: var(--text-gray); font-size: 0.75rem;">
+            Config Version: 1.0.31 | &copy; 2026 ASL TUNNEL VPN
+        </footer>
+    </div>
+
+    <script>
+        let currentLang = 'ar';
+        const langData = {
+            ar: {
+                btn: "English", btnDl: "تحميل التطبيق الآن", tg: "انضم إلينا على تلغرام",
+                hTitle: "ASL Tunnel Pro", hDesc: "تشفير آمن وحرية إنترنت مطلقة", gallery: "صور من داخل التطبيق",
+                d1t: "البروتوكولات المدعومة", d1p: "يدعم التطبيق SSH, TLS, V2Ray, SlowDNS و UDP بنجاح.",
+                d2t: "تشفير عالي الأمان", d2p: "تشفير AES-256 العسكري يحمي بياناتك من أي تتبع أو مراقبة.",
+                d3t: "سرعة فائقة (Turbo)", d3p: "سيرفرات فائقة السرعة تضمن لك تجربة تصفح وألعاب سلسة."
+            },
+            en: {
+                btn: "العربية", btnDl: "Download Now", tg: "Join us on Telegram",
+                hTitle: "ASL Tunnel Pro", hDesc: "Secure encryption and total internet freedom", gallery: "App Screenshots",
+                d1t: "Supported Protocols", d1p: "Supports SSH, TLS, V2Ray, SlowDNS, and UDP protocols.",
+                d2t: "Military Encryption", d2p: "AES-256 encryption protects your data from tracking.",
+                d3t: "Turbo Speed", d3p: "High-speed servers for a smooth browsing and gaming experience."
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.body.className = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            
+            document.querySelector('.lang-btn').innerText = langData[currentLang].btn;
+            document.getElementById('btn-dl').innerText = langData[currentLang].btnDl;
+            document.getElementById('tg-txt').innerText = langData[currentLang].tg;
+            document.getElementById('hero-title').innerText = langData[currentLang].hTitle;
+            document.getElementById('hero-desc').innerText = langData[currentLang].hDesc;
+            document.getElementById('gallery-title').innerText = langData[currentLang].gallery;
+            document.getElementById('desc-1-t').innerText = langData[currentLang].d1t;
+            document.getElementById('desc-1-p').innerText = langData[currentLang].d1p;
+            document.getElementById('desc-2-t').innerText = langData[currentLang].d2t;
+            document.getElementById('desc-2-p').innerText = langData[currentLang].d2p;
+            document.getElementById('desc-3-t').innerText = langData[currentLang].d3t;
+            document.getElementById('desc-3-p').innerText = langData[currentLang].d3p;
+        }
+    </script>
+</body>
+</html>
