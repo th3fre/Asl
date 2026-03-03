@@ -16,17 +16,16 @@
             --border: #30363d; 
             --text-gray: #8b949e;
             --sidebar-width: 260px;
+            --error-red: #ff4d4d;
         }
 
         * { box-sizing: border-box; transition: all 0.3s ease; }
         body { margin: 0; padding: 0; background-color: var(--bg-dark); color: white; font-family: 'Cairo', 'Poppins', sans-serif; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        /* البار العلوي */
         .app-bar { background-color: var(--app-green); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .menu-toggle { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; padding: 5px; }
         .lang-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-family: 'Cairo'; }
 
-        /* القائمة الجانبية */
         .sidebar { position: fixed; top: 0; right: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100%; background-color: #12161d; z-index: 1100; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
         body.en .sidebar { right: auto; left: calc(-1 * var(--sidebar-width)); }
         body.sidebar-open .sidebar { right: 0; }
@@ -53,6 +52,7 @@
             background: #0d1117; color: white; outline: none; font-family: inherit; font-size: 0.9rem;
         }
         input:focus, textarea:focus { border-color: var(--app-light-green); }
+        input.invalid { border-color: var(--error-red); box-shadow: 0 0 5px rgba(255, 77, 77, 0.3); }
         
         .send-btn { 
             background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%); color: white; border: none; 
@@ -63,7 +63,6 @@
 
         footer { background-color: #161b22; padding: 20px; text-align: center; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-gray); }
 
-        /* لغات واتجاهات */
         body.en { direction: ltr; }
     </style>
 </head>
@@ -81,7 +80,6 @@
             <a href="v2uri.html"><i class="fas fa-code"></i> <span class="nav-json">JSON TO URI</span></a>
             <a href="ip.html"><i class="fas fa-globe"></i> <span class="nav-ip">معلومات الـ IP</span></a>
             <a href="privacy.html"><i class="fas fa-user-shield"></i> <span class="nav-privacy">سياسة الخصوصية</span></a>
-
         </nav>
     </aside>
 
@@ -105,6 +103,10 @@
                     <input type="text" id="user_name" placeholder="أدخل اسمك" required>
                 </div>
                 <div class="form-group">
+                    <label id="lbl-contact">البريد الإلكتروني أو يوزر تلجرام</label>
+                    <input type="text" id="user_contact" placeholder="example@mail.com أو @username" required>
+                </div>
+                <div class="form-group">
                     <label id="lbl-msg">الرسالة</label>
                     <textarea id="user_msg" rows="4" placeholder="كيف يمكننا مساعدتك؟" required></textarea>
                 </div>
@@ -126,11 +128,16 @@
                 home: "الرئيسية", json: "JSON TO URI", ip: "معلومات الـ IP", privacy: "سياسة الخصوصية", contact: "اتصل بنا",
                 cardTitle: "راسلنا عبر تلجرام",
                 cardDesc: "اكتب استفسارك وسيصلنا فوراً في القناة الخاصة بالدعم.",
-                lblName: "الاسم", lblMsg: "الرسالة",
-                placeholderName: "أدخل اسمك", placeholderMsg: "كيف يمكننا مساعدتك؟",
+                lblName: "الاسم", 
+                lblContact: "البريد الإلكتروني أو يوزر تلجرام",
+                lblMsg: "الرسالة",
+                placeholderName: "أدخل اسمك", 
+                placeholderContact: "example@mail.com أو @username",
+                placeholderMsg: "كيف يمكننا مساعدتك؟",
                 btnSend: "إرسال عبر تلجرام", btnSending: "جاري الإرسال...",
                 success: "✅ تم إرسال رسالتك بنجاح إلى فريق الدعم.",
                 error: "❌ فشل الإرسال، تأكد من الإعدادات.",
+                invalidContact: "⚠️ يرجى إدخال بريد إلكتروني صحيح أو يوزر تلجرام يبدأ بـ @",
                 footer: "© 2026 ASL TUNNEL VPN | نظام الدعم الفني"
             },
             en: {
@@ -139,11 +146,16 @@
                 home: "Home", json: "JSON TO URI", ip: "IP Info", privacy: "Privacy Policy", contact: "Contact Us",
                 cardTitle: "Contact via Telegram",
                 cardDesc: "Write your inquiry and it will reach our support channel instantly.",
-                lblName: "Name", lblMsg: "Message",
-                placeholderName: "Enter your name", placeholderMsg: "How can we help you?",
+                lblName: "Name", 
+                lblContact: "Email or Telegram ID",
+                lblMsg: "Message",
+                placeholderName: "Enter your name", 
+                placeholderContact: "example@mail.com or @username",
+                placeholderMsg: "How can we help you?",
                 btnSend: "Send via Telegram", btnSending: "Sending...",
                 success: "✅ Your message has been sent successfully.",
                 error: "❌ Sending failed, check your settings.",
+                invalidContact: "⚠️ Please enter a valid email or a Telegram username starting with @",
                 footer: "© 2026 ASL TUNNEL VPN | Support System"
             }
         };
@@ -161,8 +173,10 @@
             document.getElementById('card-title').innerText = data.cardTitle;
             document.getElementById('card-desc').innerText = data.cardDesc;
             document.getElementById('lbl-name').innerText = data.lblName;
+            document.getElementById('lbl-contact').innerText = data.lblContact;
             document.getElementById('lbl-msg').innerText = data.lblMsg;
             document.getElementById('user_name').placeholder = data.placeholderName;
+            document.getElementById('user_contact').placeholder = data.placeholderContact;
             document.getElementById('user_msg').placeholder = data.placeholderMsg;
             document.getElementById('sendBtn').innerText = data.btnSend;
             document.getElementById('footer-text').innerText = data.footer;
@@ -171,20 +185,38 @@
             document.querySelector('.nav-json').innerText = data.json;
             document.querySelector('.nav-ip').innerText = data.ip;
             document.querySelector('.nav-privacy').innerText = data.privacy;
-            document.querySelector('.nav-contact').innerText = data.contact;
         }
 
         const TELEGRAM_TOKEN = '8742836065:AAGseliYQDE72DX6TK2FaP8mR-gIzEQptbc'; 
         const CHAT_ID = '1780904599';
 
+        // وظيفة التحقق من صحة المدخلات
+        function validateInput(val) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const tgRegex = /^@[a-zA-Z0-9_]{4,32}$/;
+            return emailRegex.test(val) || tgRegex.test(val);
+        }
+
         document.getElementById('tgForm').onsubmit = async function(e) {
             e.preventDefault();
             const data = langData[currentLang];
             const name = document.getElementById('user_name').value;
+            const contact = document.getElementById('user_contact').value.trim();
             const message = document.getElementById('user_msg').value;
             const btn = document.getElementById('sendBtn');
+            const contactInput = document.getElementById('user_contact');
 
-            const text = `🚀 *Support Message*\n\n👤 *Name:* ${name}\n💬 *Message:* ${message}`;
+            // التحقق قبل البدء
+            if (!validateInput(contact)) {
+                alert(data.invalidContact);
+                contactInput.classList.add('invalid');
+                contactInput.focus();
+                return;
+            } else {
+                contactInput.classList.remove('invalid');
+            }
+
+            const text = `🚀 *New Support Message*\n\n👤 *Name:* ${name}\n📧 *Contact:* ${contact}\n💬 *Message:* ${message}`;
 
             btn.innerText = data.btnSending;
             btn.disabled = true;
@@ -203,16 +235,20 @@
                 if (response.ok) {
                     alert(data.success);
                     document.getElementById('tgForm').reset();
-                    btn.innerText = data.btnSend;
                 } else {
                     throw new Error();
                 }
             } catch (err) {
                 alert(data.error);
-                btn.innerText = data.btnSend;
             } finally {
+                btn.innerText = data.btnSend;
                 btn.disabled = false;
             }
+        };
+
+        // مسح علامة الخطأ عند بدء الكتابة
+        document.getElementById('user_contact').oninput = function() {
+            this.classList.remove('invalid');
         };
     </script>
 </body>
