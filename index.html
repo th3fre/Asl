@@ -4,19 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASL TUNNEL VPN - Official</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" href="images/my-logo.png">
-<link rel="apple-touch-icon" href="images/apple-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --app-green: #2d5a3f; 
+            --app-green: #1e3d2b; 
             --app-light-green: #4caf50; 
-            --bg-dark: #0a0a0a; 
+            --bg-dark: #0d1117; 
             --card-bg: #161b22; 
             --text-gray: #8b949e;
             --white: #ffffff;
             --border: #30363d;
+            --sidebar-width: 260px;
         }
 
         * { box-sizing: border-box; transition: all 0.3s ease; }
@@ -26,12 +25,13 @@
             background-color: var(--bg-dark);
             color: var(--white);
             font-family: 'Cairo', 'Poppins', sans-serif;
+            overflow-x: hidden;
         }
 
-        /* تصغير البار العلوي */
+        /* البار العلوي */
         .app-bar {
             background-color: var(--app-green);
-            padding: 8px 15px; /* تقليل الحشو لتصغير الحجم */
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -39,91 +39,120 @@
             top: 0; z-index: 1000;
         }
 
-        .app-bar h2 { font-size: 1rem; margin: 0; } /* تصغير حجم الخط */
+        .menu-toggle {
+            background: none; border: none; color: white;
+            font-size: 1.3rem; cursor: pointer; padding: 5px;
+        }
 
         .lang-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white; padding: 4px 10px;
-            border-radius: 6px; cursor: pointer; font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 5px 12px;
+            border-radius: 8px; cursor: pointer; font-size: 0.8rem;
         }
 
-        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+        /* القائمة الجانبية */
+        .sidebar {
+            position: fixed;
+            top: 0; right: calc(-1 * var(--sidebar-width));
+            width: var(--sidebar-width);
+            height: 100%;
+            background-color: #12161d;
+            z-index: 1100;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.en .sidebar { right: auto; left: calc(-1 * var(--sidebar-width)); }
+        body.sidebar-open .sidebar { right: 0; }
+        body.en.sidebar-open .sidebar { left: 0; }
+
+        .sidebar-nav { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .sidebar-nav a {
+            color: var(--white); text-decoration: none;
+            padding: 12px 15px; border-radius: 12px;
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.03);
+        }
+        .sidebar-nav a:hover { background: var(--app-green); }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1050; display: none;
+        }
+        body.sidebar-open .overlay { display: block; }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
 
         .main-card {
-            background-color: #1c2128;
-            border-radius: 28px;
-            padding: 25px;
-            border: 1px solid var(--border);
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 25px;
+            background: #1c2128; border-radius: 28px; padding: 30px 20px;
+            border: 1px solid var(--border); text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px;
         }
 
-        .app-logo {
-            width: 80px; height: 80px;
-            border-radius: 18px;
-            border: 2px solid var(--app-light-green);
-            margin-bottom: 10px;
-        }
+        .app-logo { width: 85px; height: 85px; border-radius: 20px; border: 2px solid var(--app-light-green); margin-bottom: 10px; }
 
         .action-btn {
             background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%);
-            color: white; width: 100%; padding: 16px;
-            border-radius: 50px; border: none;
-            font-size: 1.1rem; font-weight: bold;
-            margin-top: 15px; cursor: pointer;
-            display: block; text-decoration: none;
+            color: white; width: 100%; padding: 16px; border-radius: 50px;
+            border: none; font-size: 1.1rem; font-weight: bold;
+            margin-top: 15px; cursor: pointer; display: block; text-decoration: none;
         }
 
-        .screenshots {
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            margin: 25px 0;
-            padding-bottom: 10px;
+        /* تصميم بطاقة التلجرام الجديد والمحسن */
+        .telegram-card {
+            background: linear-gradient(135deg, #2481cc 0%, #34aadc 100%);
+            border-radius: 20px; padding: 18px; margin-top: 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            text-decoration: none; color: white;
+            box-shadow: 0 8px 15px rgba(36, 129, 204, 0.3);
+            position: relative; overflow: hidden; text-align: right;
         }
+        .telegram-card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(36, 129, 204, 0.4); }
+        .tg-content { display: flex; align-items: center; gap: 12px; z-index: 2; }
+        .tg-icon-circle { background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .tg-icon-circle i { color: #2481cc; font-size: 1.2rem; }
+        .tg-info h4 { margin: 0; font-size: 0.95rem; font-weight: bold; }
+        .tg-info span { font-size: 0.75rem; opacity: 0.9; }
+        .tg-join-badge { background: rgba(255, 255, 255, 0.2); padding: 5px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.4); z-index: 2; }
+        .telegram-card::after { content: "\f3fe"; font-family: "Font Awesome 6 Brands"; position: absolute; left: -10px; bottom: -10px; font-size: 70px; color: rgba(255, 255, 255, 0.1); transform: rotate(15deg); }
+
+        .screenshots { display: flex; overflow-x: auto; gap: 12px; margin: 25px 0; padding-bottom: 10px; }
         .screenshots img { height: 350px; border-radius: 15px; border: 1px solid var(--border); }
 
-        .info-section { margin-top: 20px; display: grid; gap: 15px; }
-
-        .info-item {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 18px;
-            border-radius: 18px;
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .info-icon { font-size: 1.6rem; color: var(--app-light-green); }
-
+        .info-item { background: var(--card-bg); border: 1px solid var(--border); padding: 18px; border-radius: 18px; display: flex; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
+        .info-icon { font-size: 1.5rem; color: var(--app-light-green); }
         .info-text h3 { margin: 0 0 5px 0; font-size: 1rem; color: var(--app-light-green); }
         .info-text p { margin: 0; color: var(--text-gray); font-size: 0.85rem; line-height: 1.4; }
 
-        .telegram-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
-            color: white;
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-
         body.en { direction: ltr; }
+        body.en .telegram-card { text-align: left; }
+        body.en .telegram-card::after { left: auto; right: -10px; }
     </style>
 </head>
-<body>
+<body class="ar">
+
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <aside class="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: bold; color: var(--app-light-green);">ASL MENU</span>
+            <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html"><i class="fas fa-home"></i> <span class="nav-home">الرئيسية</span></a>
+            <a href="v2uri.html"><i class="fas fa-code"></i> <span class="nav-json">JSON TO URI</span></a>
+            <a href="ip.html"><i class="fas fa-globe"></i> <span class="nav-ip">معلومات الـ IP</span></a>
+            <a href="privacy.html"><i class="fas fa-user-shield"></i> <span class="nav-privacy">سياسة الخصوصية</span></a>
+            <a href="contact.html"><i class="fas fa-envelope"></i> <span class="nav-contact">اتصل بنا</span></a>
+        </nav>
+    </aside>
 
     <div class="app-bar">
-        <h2 id="nav-title">ASL TUNNEL VPN</h2>
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <h2 id="nav-title" style="margin:0; font-size: 1rem;">ASL TUNNEL VPN</h2>
         <button class="lang-btn" onclick="toggleLanguage()">English</button>
     </div>
 
@@ -135,36 +164,44 @@
             
             <a href="https://play.google.com/store/apps/details?id=com.asltunnel.vpn" class="action-btn" id="btn-dl">تحميل التطبيق الآن</a>
             
-            <a href="https://t.me/ASLTUNNEL" class="telegram-btn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" width="18" alt="TG">
-                <span id="tg-txt">انضم إلينا على تلغرام</span>
+            <a href="https://t.me/ASLTUNNEL" class="telegram-card" target="_blank">
+                <div class="tg-content">
+                    <div class="tg-icon-circle">
+                        <i class="fab fa-telegram-plane"></i>
+                    </div>
+                    <div class="tg-info">
+                        <h4 id="tg-title">قناة التلجرام الرسمية</h4>
+       
+                    </div>
+                </div>
+                <div class="tg-join-badge" id="tg-btn">انضمام</div>
             </a>
         </div>
 
         <h3 id="gallery-title" style="border-right: 4px solid var(--app-light-green); padding-right: 10px; font-size: 1.1rem;">صور من داخل التطبيق</h3>
         <div class="screenshots">
-            <img src="https://play-lh.googleusercontent.com/hnhUmuLpLsTCFpW3j1L0WWsLevm6EkbLkI5pyVH5T-lrTkcxrn6hzroOMqjplEJNdWaULlagWRjYLa2oSGLhjxE=w1052-h592-rw" alt="Screen 1">
-            <img src="https://play-lh.googleusercontent.com/dJyUChRRWgguWl2i5u5WhMxw3JjZdjH9y5BfyuPnbXFSUj-mbcE5BNLlv4VPP1i0-DH6oxbW_xyq6rTMt8HuOQ=w1052-h592-rw" alt="Screen 2">
-            <img src="https://play-lh.googleusercontent.com/H0Lc-n51Z_3aG5GdnDfJRYwCZm4jSUNBg04EVbY7nziDwXmKBKSjS18XKIBvYOocK9XvEqqfS8FE0rYWVm1h=w1052-h592-rw" alt="Screen 3">
+            <img src="https://play-lh.googleusercontent.com/hnhUmuLpLsTCFpW3j1L0WWsLevm6EkbLkI5pyVH5T-lrTkcxrn6hzroOMqjplEJNdWaULlagWRjYLa2oSGLhjxE=w1052-h592-rw">
+            <img src="https://play-lh.googleusercontent.com/dJyUChRRWgguWl2i5u5WhMxw3JjZdjH9y5BfyuPnbXFSUj-mbcE5BNLlv4VPP1i0-DH6oxbW_xyq6rTMt8HuOQ=w1052-h592-rw">
+            <img src="https://play-lh.googleusercontent.com/H0Lc-n51Z_3aG5GdnDfJRYwCZm4jSUNBg04EVbY7nziDwXmKBKSjS18XKIBvYOocK9XvEqqfS8FE0rYWVm1h=w1052-h592-rw">
         </div>
 
         <div class="info-section">
             <div class="info-item">
-                <div class="info-icon">⚙️</div>
+                <div class="info-icon"><i class="fas fa-cog"></i></div>
                 <div class="info-text">
                     <h3 id="desc-1-t">البروتوكولات المدعومة</h3>
                     <p id="desc-1-p">يدعم التطبيق SSH, TLS, V2Ray, SlowDNS و UDP لتخطي أصعب جدران الحماية بنجاح.</p>
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-icon">🔐</div>
+                <div class="info-icon"><i class="fas fa-lock"></i></div>
                 <div class="info-text">
                     <h3 id="desc-2-t">تشفير عالي الأمان</h3>
                     <p id="desc-2-p">تشفير AES-256 العسكري يحمي بياناتك من أي تتبع أو مراقبة من قبل مزود الخدمة.</p>
                 </div>
             </div>
             <div class="info-item">
-                <div class="info-icon">🚀</div>
+                <div class="info-icon"><i class="fas fa-rocket"></i></div>
                 <div class="info-text">
                     <h3 id="desc-3-t">سرعة فائقة (Turbo)</h3>
                     <p id="desc-3-p">سيرفرات فائقة السرعة تضمن لك تجربة تصفح وألعاب سلسة جداً دون انقطاع.</p>
@@ -173,7 +210,7 @@
         </div>
 
         <footer style="text-align: center; padding: 30px 0; color: var(--text-gray); font-size: 0.75rem;">
-            By : MO GROUPE | &copy; 2026 ASL TUNNEL VPN
+            BY MO GROUPE | © 2026 ASL TUNNEL VPN
         </footer>
     </div>
 
@@ -181,29 +218,37 @@
         let currentLang = 'ar';
         const langData = {
             ar: {
-                btn: "English", btnDl: "تحميل التطبيق الآن", tg: "انضم إلينا على تلغرام",
+                btn: "English", btnDl: "تحميل التطبيق الآن", 
+                tgTitle: "قناة التلجرام الرسمية", tgStats: "أحدث التحديثات والكونفيجات", tgBtn: "انضمام",
                 hTitle: "ASL Tunnel Pro", hDesc: "تشفير آمن وحرية إنترنت مطلقة", gallery: "صور من داخل التطبيق",
+                home: "الرئيسية", json: "JSON TO URI", ip: "معلومات الـ IP", privacy: "سياسة الخصوصية", contact: "اتصل بنا",
                 d1t: "البروتوكولات المدعومة", d1p: "يدعم التطبيق SSH, TLS, V2Ray, SlowDNS و UDP بنجاح.",
                 d2t: "تشفير عالي الأمان", d2p: "تشفير AES-256 العسكري يحمي بياناتك من أي تتبع أو مراقبة.",
                 d3t: "سرعة فائقة (Turbo)", d3p: "سيرفرات فائقة السرعة تضمن لك تجربة تصفح وألعاب سلسة."
             },
             en: {
-                btn: "العربية", btnDl: "Download Now", tg: "Join us on Telegram",
+                btn: "العربية", btnDl: "Download Now", 
+                tgTitle: "Official Telegram Channel", tgStats: "Latest updates & configs", tgBtn: "Join",
                 hTitle: "ASL Tunnel Pro", hDesc: "Secure encryption and total internet freedom", gallery: "App Screenshots",
+                home: "Home", json: "JSON TO URI", ip: "IP Info", privacy: "Privacy Policy", contact: "Contact Us",
                 d1t: "Supported Protocols", d1p: "Supports SSH, TLS, V2Ray, SlowDNS, and UDP protocols.",
                 d2t: "Military Encryption", d2p: "AES-256 encryption protects your data from tracking.",
                 d3t: "Turbo Speed", d3p: "High-speed servers for a smooth browsing and gaming experience."
             }
         };
 
+        function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+
         function toggleLanguage() {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            document.body.className = currentLang;
+            document.body.className = currentLang + (document.body.classList.contains('sidebar-open') ? ' sidebar-open' : '');
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             
             document.querySelector('.lang-btn').innerText = langData[currentLang].btn;
             document.getElementById('btn-dl').innerText = langData[currentLang].btnDl;
-            document.getElementById('tg-txt').innerText = langData[currentLang].tg;
+            document.getElementById('tg-title').innerText = langData[currentLang].tgTitle;
+            document.getElementById('tg-stats').innerText = langData[currentLang].tgStats;
+            document.getElementById('tg-btn').innerText = langData[currentLang].tgBtn;
             document.getElementById('hero-title').innerText = langData[currentLang].hTitle;
             document.getElementById('hero-desc').innerText = langData[currentLang].hDesc;
             document.getElementById('gallery-title').innerText = langData[currentLang].gallery;
@@ -213,9 +258,13 @@
             document.getElementById('desc-2-p').innerText = langData[currentLang].d2p;
             document.getElementById('desc-3-t').innerText = langData[currentLang].d3t;
             document.getElementById('desc-3-p').innerText = langData[currentLang].d3p;
+
+            document.querySelector('.nav-home').innerText = langData[currentLang].home;
+            document.querySelector('.nav-json').innerText = langData[currentLang].json;
+            document.querySelector('.nav-ip').innerText = langData[currentLang].ip;
+            document.querySelector('.nav-privacy').innerText = langData[currentLang].privacy;
+            document.querySelector('.nav-contact').innerText = langData[currentLang].contact;
         }
     </script>
 </body>
-
 </html>
-
