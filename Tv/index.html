@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL TV</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        :root { --app-green: #1e3d2b; --app-light-green: #4caf50; --bg-dark: #0d1117; --card-bg: #161b22; --border: #30363d; --text-color: #ffffff; }
+        .light-mode { --bg-dark: #f0f2f5; --card-bg: #ffffff; --border: #d1d5db; --text-color: #1f2937; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg-dark); color: var(--text-color); margin: 0; transition: 0.3s; overflow-x: hidden; }
+        .fixed-header { position: fixed; top: 0; width: 100%; background: var(--app-green); height: 60px; z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 2px solid var(--app-light-green); }
+        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--card-bg); z-index: 2000; transition: 0.4s; border-left: 1px solid var(--app-light-green); }
+        .sidebar.active { right: 0; }
+        .close-sidebar { position: absolute; top: 15px; left: 15px; font-size: 20px; cursor: pointer; color: var(--app-light-green); }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1500; display: none; backdrop-filter: blur(4px); }
+        .sidebar-item { padding: 15px 20px; display: flex; align-items: center; font-weight: bold; cursor: pointer; color: var(--text-color); }
+        .page { display: none; padding: 80px 15px 120px; min-height: 100vh; }
+        .page.active { display: block; }
+        .video-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; display: none; background: #000; }
+        .close-player-btn { position: absolute; top: 12px; left: 12px; z-index: 3001; color: white; font-size: 25px; cursor: pointer; }
+        #serverModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; }
+        .server-box { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid var(--app-light-green); width: 85%; max-width: 350px; text-align: center; }
+        .server-btn { width: 100%; padding: 12px; margin-top: 10px; background: var(--app-green); border-radius: 10px; color: white; font-weight: bold; }
+        .channel-button { width: 100%; background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 10px; border: 1px solid var(--border); text-align: right; color: var(--text-color); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .match-card { background: var(--card-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--app-green); height: 65px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--app-light-green); z-index: 1000; }
+        #startapp-banner { position: fixed; bottom: 65px; width: 100%; z-index: 999; display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <header class="fixed-header">
+        <div onclick="toggleSidebar()" class="text-white text-xl"><i class="fas fa-bars"></i></div>
+        <div class="text-xl font-black italic text-white tracking-widest">ASL <span class="text-green-400">TV</span></div>
+        <div onclick="toggleTheme()" class="text-white text-xl"><i id="themeIcon" class="fas fa-moon"></i></div>
+    </header>
+
+    <div id="startapp-banner"></div>
+
+    <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar" class="sidebar">
+        <div class="close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></div>
+        <div class="p-8 text-center border-b border-gray-800"><div class="text-3xl font-black text-green-500 italic">ASL TV</div></div>
+        <div class="sidebar-item" onclick="showPageWithAd('livePage')"><i class="fas fa-tv ml-3"></i> القنوات</div>
+        <div class="sidebar-item" onclick="showPageWithAd('eventPage')"><i class="fas fa-futbol ml-3"></i> المباريات</div>
+        <a href="https://t.me/YourChannel" target="_blank" class="sidebar-item text-blue-400"><i class="fab fa-telegram-plane ml-3"></i> التلجرام</a>
+        <div class="sidebar-item" onclick="openAbout()"><i class="fas fa-info-circle ml-3"></i> عن التطبيق</div>
+    </div>
+
+    <div id="livePage" class="page active"><div id="sectionsContainer"></div></div>
+    <div id="subPage" class="page">
+        <button onclick="showPage('livePage')" class="mb-4 text-green-500 font-bold"><i class="fas fa-arrow-right ml-2"></i> عودة</button>
+        <div id="subContent" class="grid grid-cols-3 gap-3"></div>
+    </div>
+    <div id="eventPage" class="page"><div id="matchesContainer"></div></div>
+
+    <div id="serverModal"><div class="server-box"><h3 class="mb-4 font-bold text-green-500">اختر السيرفر</h3><div id="serverList"></div><button onclick="closeServerModal()" class="mt-4 text-gray-500">إلغاء</button></div></div>
+
+    <div id="videoWrapper" class="video-container">
+        <div class="close-player-btn" onclick="stopVideo()"><i class="fas fa-times"></i></div>
+        <video id="main-player" class="video-js vjs-big-play-centered" controls preload="auto"></video>
+    </div>
+
+    <nav class="bottom-nav">
+        <button onclick="showPageWithAd('livePage')" class="text-white flex flex-col items-center"><i class="fas fa-tv"></i><span class="text-[10px]">القنوات</span></button>
+        <button onclick="showPageWithAd('eventPage')" class="text-white flex flex-col items-center"><i class="fas fa-futbol"></i><span class="text-[10px]">المباريات</span></button>
+    </nav>
+
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.startapp.com/sdk/v4/startapp.js" type="text/javascript"></script>
+    <script src="script.js"></script>
+</body>
+</html>
