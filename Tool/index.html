@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL TOOLS PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        
+        :root {
+            --app-green: #1e3d2b; 
+            --app-light-green: #4caf50; 
+            --bg-dark: #0d1117; 
+            --card-bg: #161b22; 
+            --text-gray: #8b949e;
+            --white: #ffffff;
+            --border: #30363d;
+            --sidebar-width: 280px;
+        }
+
+        body { 
+            font-family: 'Tajawal', sans-serif; 
+            background: var(--bg-dark); 
+            color: var(--white); 
+            min-height: 100vh; 
+        }
+
+        .sidebar { 
+            transition: transform 0.4s ease; 
+            z-index: 1000; 
+            position: fixed; 
+            right: 0; 
+            top: 0; 
+            height: 100%; 
+            width: var(--sidebar-width); 
+            background: var(--card-bg);
+            border-left: 1px solid var(--border);
+        }
+        
+        .sidebar:not(.active) { transform: translateX(100%); }
+        
+        .glass-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+        }
+
+        input, textarea, select { 
+            background: #0d1117 !important; 
+            border: 1px solid var(--border) !important; 
+            color: #e2e8f0 !important; 
+            outline: none; 
+        }
+
+        input:focus { border-color: var(--app-light-green) !important; }
+
+        #toast { 
+            visibility: hidden; 
+            min-width: 250px; 
+            background: var(--app-green); 
+            color: #fff; 
+            text-align: center; 
+            border-radius: 12px; 
+            padding: 16px; 
+            position: fixed; 
+            z-index: 2000; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            border: 1px solid var(--app-light-green); 
+            opacity: 0; 
+            transition: 0.3s; 
+        }
+        
+        #toast.show { visibility: visible; opacity: 1; }
+
+        .tab-btn { 
+            transition: 0.3s; 
+            border: 1px solid var(--border); 
+            color: var(--text-gray);
+        }
+        
+        .tab-active { 
+            background: var(--app-light-green) !important; 
+            color: white !important; 
+            border-color: var(--app-light-green) !important; 
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); 
+        }
+
+        .btn-primary { background: var(--app-light-green); transition: 0.3s; }
+        .btn-primary:hover { background: #43a047; opacity: 0.9; }
+        
+        .text-accent { color: var(--app-light-green); }
+        .border-accent { border-color: var(--app-light-green); }
+    </style>
+</head>
+<body>
+    <div id="toast"></div>
+
+    <div id="sidebar" class="sidebar shadow-2xl">
+        <div class="p-8">
+            <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-5">
+                <span class="text-2xl font-black text-accent">ASL TOOLS</span>
+                <button onclick="toggleSidebar()"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            <nav class="space-y-4">
+                <button onclick="showPage('generator')" class="w-full p-4 rounded-2xl flex items-center gap-4 bg-slate-800/50 hover:bg-green-600/20 transition-all text-right text-slate-300">
+                    <i class="fas fa-bolt text-yellow-500 w-6"></i> <span>المولد الذكي</span>
+                </button>
+                <button onclick="showPage('converter')" class="w-full p-4 rounded-2xl flex items-center gap-4 bg-slate-800/50 hover:bg-emerald-600/20 transition-all text-right text-slate-300">
+                    <i class="fas fa-exchange-alt text-emerald-500 w-6"></i> <span>المحول الجماعي</span>
+                </button>
+                <button onclick="showPage('database')" class="w-full p-4 rounded-2xl flex items-center gap-4 bg-slate-800/50 hover:bg-green-600/20 transition-all text-right text-slate-300">
+                    <i class="fas fa-database text-accent w-6"></i> <span>إدارة الهوستات</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <div class="min-h-screen flex flex-col">
+        <header class="p-5 glass-card sticky top-0 z-50 flex justify-between items-center px-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center font-bold font-mono"></div>
+                <h1 class="text-xl font-bold tracking-tight">ASL TOOLS <span class="text-[10px] bg-green-600 px-2 py-0.5 rounded ml-2 uppercase">V2RAY</span></h1>
+            </div>
+            <button onclick="toggleSidebar()" class="p-3 bg-slate-800 rounded-xl hover:bg-slate-700 transition-all"><i class="fas fa-bars"></i></button>
+        </header>
+
+        <main id="page-generator" class="flex-grow max-w-6xl mx-auto p-6 w-full">
+            <div class="mt-4 mb-8 glass-card p-4 rounded-2xl border-r-4 border-accent">
+                <h2 class="text-accent font-bold text-sm mb-2"><i class="fas fa-info-circle ml-2"></i> المولد الذكي:</h2>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    هذا المولد يقوم بسحب (UUID) والمسار من الرابط، ثم يدمجهما مع الهوستات المحفوظة في القاعدة بناءً على النوع المختار.
+                </p>
+            </div>
+            <div class="mt-4 text-center">
+                <div id="tabsContainer" class="flex flex-wrap gap-2 p-2 bg-slate-900/50 rounded-2xl border border-slate-800 mb-8 max-w-2xl mx-auto">
+                    <button id="btnVLESS" onclick="switchTab('VLESS')" class="tab-btn flex-1 py-3 rounded-xl text-[11px] font-bold">VLESS TLS</button>
+                    <button id="btnNON" onclick="switchTab('NON')" class="tab-btn flex-1 py-3 rounded-xl text-[11px] font-bold">VLESS NTLS</button>
+                    <button id="btnVMESS" onclick="switchTab('VMESS')" class="tab-btn flex-1 py-3 rounded-xl text-[11px] font-bold">VMESS</button>
+                    <button id="btnGCP" onclick="switchTab('GCP')" class="tab-btn flex-1 py-3 rounded-xl text-[11px] font-bold">GCP</button>
+                </div>
+                <input type="text" id="mainLink" placeholder="الصق الرابط (vless/vmess) هنا..." 
+                class="w-full p-6 rounded-3xl text-left font-mono text-sm border-2 border-slate-800 transition-all" dir="ltr" oninput="autoDetectAndGenerate()">
+            </div>
+            <div id="networksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12"></div>
+        </main>
+
+        <main id="page-converter" class="max-w-7xl mx-auto p-6 hidden w-full flex-grow">
+            <div class="flex justify-end mb-4">
+                <button onclick="clearConverter()" class="px-6 py-2 bg-red-600/20 hover:bg-red-600 text-red-500 rounded-xl text-xs font-bold transition-all">إفراغ الحقول</button>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="glass-card p-8 rounded-[2rem] border-t-4 border-accent">
+                    <h3 class="text-accent font-bold uppercase text-sm mb-4">URI Links</h3>
+                    <textarea id="inputURI" class="w-full h-80 rounded-2xl p-5 text-xs font-mono mb-6" dir="ltr" placeholder="vless://...&#10;vmess://..."></textarea>
+                    <button onclick="processUriToJson()" class="w-full py-5 btn-primary rounded-2xl font-black">تحويل إلى JSON</button>
+                </div>
+                <div class="glass-card p-8 rounded-[2rem] border-t-4 border-emerald-600">
+                    <h3 class="text-emerald-400 font-bold uppercase text-sm mb-4">JSON Data</h3>
+                    <textarea id="outputJSON" class="w-full h-80 rounded-2xl p-5 text-xs font-mono mb-6" dir="ltr" placeholder='[{"Name":"...","V2rayAddress":"..."}]'></textarea>
+                    <button onclick="processJsonToUri()" class="w-full py-5 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-black">تحويل إلى URI</button>
+                </div>
+            </div>
+        </main>
+
+        <main id="page-database" class="max-w-7xl mx-auto p-6 hidden w-full flex-grow">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 glass-card p-8 rounded-[2rem] border-l-4 border-accent">
+                    <h3 class="text-xl font-bold mb-6">إدارة الهوستات</h3>
+                    <div class="mb-8 p-4 bg-green-900/10 border border-green-500/30 rounded-2xl">
+                        <label class="block text-[10px] text-accent mb-2 font-bold uppercase">التحليل التلقائي:</label>
+                        <input type="text" id="quickParse" placeholder="الصق أي رابط لاستخراج بياناته..." 
+                               class="w-full p-4 rounded-xl text-xs font-mono" oninput="parseAndFill()">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="newName" placeholder="الاسم" class="p-4 rounded-xl">
+                        <input type="text" id="newAddr" placeholder="Address (Host)" class="p-4 rounded-xl font-mono">
+                        <input type="text" id="newHost" placeholder="Host Header" class="p-4 rounded-xl font-mono">
+                        <input type="text" id="newSni" placeholder="SNI" class="p-4 rounded-xl font-mono">
+                        <select id="newType" class="p-4 rounded-xl">
+                            <option value="vless">VLESS TLS</option>
+                            <option value="non">VLESS NTLS</option>
+                            <option value="vmess">VMESS</option>
+                            <option value="gcp">GCP</option>
+                        </select>
+                        <button onclick="addHost()" class="w-full py-4 btn-primary rounded-xl font-bold transition-all">إضافة للقاعدة</button>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="glass-card p-6 rounded-[2rem] border-t-4 border-emerald-500 text-center">
+                        <button onclick="exportDB()" class="w-full py-4 bg-emerald-600 rounded-xl font-bold mb-3">تصدير DB</button>
+                        <button onclick="document.getElementById('importFile').click()" class="w-full py-4 bg-slate-800 border border-slate-700 rounded-xl font-bold">استيراد DB</button>
+                        <input type="file" id="importFile" class="hidden" onchange="importDB(event)">
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-12" id="admin_lists"></div>
+        </main>
+    </div>
+
+    <script>
+        // --- الكود البرمجي لم يتغير لضمان استقرار الوظائف ---
+        let db = { vless: [], gcp: [], non: [], vmess: [] };
+        for(let k in db) { db[k] = JSON.parse(localStorage.getItem('asl_'+k)) || []; }
+        let currentTab = "VLESS";
+
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+        function showPage(p) {
+            document.querySelectorAll('main').forEach(el => el.classList.add('hidden'));
+            document.getElementById('page-' + p).classList.remove('hidden');
+            if(p === 'database') renderAdmin();
+            toggleSidebar();
+        }
+
+        function safeAtoB(str) {
+            try { return decodeURIComponent(escape(atob(str.replace(/-/g, '+').replace(/_/g, '/')))); }
+            catch(e) { return atob(str); }
+        }
+
+        function generateAll() {
+            const raw = document.getElementById('mainLink').value.trim();
+            const grid = document.getElementById('networksGrid');
+            if(!raw) { grid.innerHTML = ''; return; }
+            
+            try {
+                let srv = { id: "", add: "", path: "/", port: 443 };
+                if(raw.startsWith('vmess://')) {
+                    const b = JSON.parse(safeAtoB(raw.replace('vmess://','')));
+                    srv = { id: b.id, add: b.add, path: b.path || "/", port: b.port || 443 };
+                } else if(raw.includes('://')) {
+                    const u = new URL(raw); const p = new URLSearchParams(u.search);
+                    srv = { id: u.username || "", add: u.hostname, path: p.get('path') || '/', port: u.port || 443 };
+                }
+
+                let list = db[currentTab.toLowerCase()] || [];
+                grid.innerHTML = list.map(n => {
+                    const fA = (!n.addr || n.addr === "host") ? srv.add : n.addr;
+                    const fH = (!n.host || n.host === "host") ? srv.add : n.host;
+                    const fS = (!n.sni || n.sni === "host") ? srv.add : n.sni;
+                    const sec = (currentTab === 'NON') ? '' : 'tls';
+                    
+                    let config = "";
+                    if(currentTab === 'VMESS') {
+                        const vObj = { v:"2", ps:n.name, add:fA, port:srv.port, id:srv.id, aid:"0", scy:"auto", net:"ws", type:"none", host:fH, path:srv.path, tls:sec, sni:fS };
+                        config = "vmess://" + btoa(unescape(encodeURIComponent(JSON.stringify(vObj))));
+                    } else {
+                        const tlsPart = sec === 'tls' ? `&security=tls&sni=${fS}` : '&security=none';
+                        config = `vless://${srv.id}@${fA}:${srv.port}?path=${encodeURIComponent(srv.path)}&encryption=none&host=${fH}&type=ws${tlsPart}#${encodeURIComponent(n.name)}`;
+                    }
+
+                    return `<div class="glass-card p-5 rounded-3xl border-b-2 border-green-600/50 hover:scale-[1.02] transition-all">
+                                <div class="text-[10px] font-bold text-accent mb-3">${n.name}</div>
+                                <button onclick="navigator.clipboard.writeText('${config}'); showToast('تم النسخ ✅')" class="w-full py-2 btn-primary rounded-xl text-[10px] font-bold">نسخ الرابط</button>
+                            </div>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        function autoDetectAndGenerate() {
+            const raw = document.getElementById('mainLink').value.trim();
+            if(!raw) return;
+            if(raw.includes('vmess')) currentTab = "VMESS";
+            else if(raw.includes('security=none')) currentTab = "NON";
+            else currentTab = "VLESS";
+            updateTabUI();
+            generateAll();
+        }
+
+        function switchTab(t) { currentTab = t; updateTabUI(); generateAll(); }
+        function updateTabUI() {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('tab-active');
+                if(b.id === 'btn' + currentTab) b.classList.add('tab-active');
+            });
+        }
+
+        function save() { for(let k in db) localStorage.setItem('asl_'+k, JSON.stringify(db[k])); renderAdmin(); }
+        function addHost() {
+            const n = document.getElementById('newName').value, a = document.getElementById('newAddr').value, 
+                  h = document.getElementById('newHost').value, s = document.getElementById('newSni').value, t = document.getElementById('newType').value;
+            if(n && a) { db[t].push({name:n, addr:a, host:h, sni:s}); save(); showToast("تمت الإضافة ✅"); }
+        }
+        function renderAdmin() {
+            const grid = document.getElementById('admin_lists'); grid.innerHTML = "";
+            for(let k in db) {
+                if(db[k].length === 0) continue;
+                let h = `<div class="glass-card p-4 rounded-xl border-t-2 border-green-500/50"><h5 class="text-[10px] text-accent mb-3 font-bold uppercase">${k}</h5>`;
+                db[k].forEach((x, i) => { 
+                    h += `<div class="flex justify-between items-center text-[10px] bg-slate-900/50 p-2 mb-2 rounded-lg">
+                            <span class="truncate ml-2">${x.name}</span>
+                            <button onclick="db['${k}'].splice(${i},1);save()" class="text-red-500 px-2">✕</button>
+                          </div>`; 
+                });
+                grid.innerHTML += h + `</div>`;
+            }
+        }
+
+        function parseAndFill() {
+            const raw = document.getElementById('quickParse').value.trim();
+            try {
+                if(raw.startsWith('vmess://')) {
+                    const b = JSON.parse(safeAtoB(raw.replace('vmess://','')));
+                    document.getElementById('newName').value = b.ps;
+                    document.getElementById('newAddr').value = b.add;
+                    document.getElementById('newHost').value = b.host;
+                    document.getElementById('newSni').value = b.sni || b.host;
+                    document.getElementById('newType').value = "vmess";
+                } else if(raw.includes('://')) {
+                    const u = new URL(raw); const p = new URLSearchParams(u.search);
+                    document.getElementById('newName').value = decodeURIComponent(u.hash.replace('#',''));
+                    document.getElementById('newAddr').value = u.hostname;
+                    document.getElementById('newHost').value = p.get('host');
+                    document.getElementById('newSni').value = p.get('sni') || p.get('host');
+                    document.getElementById('newType').value = p.get('security') === 'none' ? "non" : "vless";
+                }
+            } catch(e) {}
+        }
+
+        function clearConverter() { document.getElementById('inputURI').value = ""; document.getElementById('outputJSON').value = ""; }
+        function processUriToJson() {
+            const lines = document.getElementById('inputURI').value.split('\n');
+            const results = lines.filter(l => l.trim()).map(line => {
+                try {
+                    if(line.startsWith('vmess://')) {
+                        const b = JSON.parse(safeAtoB(line.replace('vmess://','')));
+                        return { Name: b.ps, V2rayAddress: b.add, V2rayHost: b.host, V2rayUUID: b.id, V2rayPath: b.path, SSLPort: b.port, SNI: b.sni, V2rayConfig: "vmess" };
+                    } else {
+                        const u = new URL(line); const p = new URLSearchParams(u.search);
+                        return { Name: decodeURIComponent(u.hash.replace('#','')), V2rayAddress: u.hostname, V2rayHost: p.get('host'), V2rayUUID: u.username, V2rayPath: p.get('path'), SSLPort: u.port || 443, SNI: p.get('sni'), V2rayConfig: "vless" };
+                    }
+                } catch(e) { return null; }
+            }).filter(x => x);
+            document.getElementById('outputJSON').value = JSON.stringify(results, null, 2);
+        }
+        function processJsonToUri() {
+            const data = JSON.parse(document.getElementById('outputJSON').value);
+            const res = data.map(j => {
+                if(j.V2rayConfig === "vmess") {
+                    const v = { v:"2", ps:j.Name, add:j.V2rayAddress, port:j.SSLPort, id:j.V2rayUUID, aid:"0", net:"ws", type:"none", host:j.V2rayHost, path:j.V2rayPath, tls:"tls" };
+                    return "vmess://" + btoa(JSON.stringify(v));
+                } else {
+                    return `vless://${j.V2rayUUID}@${j.V2rayAddress}:${j.SSLPort}?path=${encodeURIComponent(j.V2rayPath)}&security=tls&encryption=none&host=${j.V2rayHost}&type=ws&sni=${j.SNI || j.V2rayHost}#${encodeURIComponent(j.Name)}`;
+                }
+            });
+            document.getElementById('inputURI').value = res.join('\n');
+        }
+
+        function exportDB() { const b = new Blob([JSON.stringify(db)], {type: "application/json"}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "asl_Database.json"; a.click(); }
+        function importDB(e) { const r = new FileReader(); r.onload = (x) => { db = JSON.parse(x.target.result); save(); showToast("تم الاستيراد ✅"); }; r.readAsText(e.target.files[0]); }
+
+        window.onload = () => { renderAdmin(); updateTabUI(); };
+    </script>
+</body>
+</html>
