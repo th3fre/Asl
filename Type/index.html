@@ -13,7 +13,7 @@
             --text-gray: #8b949e;
             --white: #ffffff;
             --border: #30363d;
-            --danger: #ff5555;
+            --info-color: #58a6ff;
         }
         body { background-color: var(--bg-dark); color: var(--white); font-family: sans-serif; padding: 15px; display: flex; justify-content: center; margin: 0; }
         .box { background-color: var(--card-bg); padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid var(--border); }
@@ -44,7 +44,7 @@
         <div class="row"><button class="copy-btn" onclick="copy('oPath')">نسخ</button><div class="lbl">Path</div><div id="oPath" class="val">--</div></div>
         <div class="row"><button class="copy-btn" onclick="copy('oSni')">نسخ</button><div class="lbl">SNI / Host</div><div id="oSni" class="val">--</div></div>
         <div class="row"><div class="lbl">ISP (الشركة المزودة)</div><div id="oIsp" class="val">--</div></div>
-        <div class="row"><div class="lbl">Status (حالة السيرفر)</div><div id="oStatus" class="val">--</div></div>
+        <div class="row"><div class="lbl">Status (ملاحظة الفحص)</div><div id="oStatus" class="val" style="color: var(--info-color);">--</div></div>
     </div>
 </div>
 
@@ -83,28 +83,15 @@ async function analyze() {
         document.getElementById('oUuid').innerText = data.uuid;
         document.getElementById('oPath').innerText = data.path;
         document.getElementById('oSni').innerText = data.sni;
-        document.getElementById('oStatus').innerText = "جاري الفحص...";
+        
+        // تحديث رسالة الحالة لتعكس طبيعة السيرفرات المشفرة
+        document.getElementById('oStatus').innerText = "هذا النوع من السيرفرات (Reality/VLESS) لا يدعم الفحص عبر المتصفح.";
 
-        // جلب مزود الخدمة
         fetch(`https://ip-api.com/json/${data.add}?fields=isp`)
             .then(res => res.json())
             .then(json => document.getElementById('oIsp').innerText = json.isp || "غير معروف");
 
-        // فحص حالة السيرفر
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        fetch(`https://${data.add}:${data.port}`, { mode: 'no-cors', signal: controller.signal })
-            .then(() => {
-                document.getElementById('oStatus').innerText = "✅ شغال (Online)";
-                document.getElementById('oStatus').style.color = "#4caf50";
-            })
-            .catch(() => {
-                document.getElementById('oStatus').innerText = "❌ متوقف أو محجوب (Offline)";
-                document.getElementById('oStatus').style.color = "#ff5555";
-            });
-
-    } catch(e) { alert("خطأ في تحليل الرابط!"); }
+    } catch(e) { alert("خطأ في تحليل الرابط! تأكد من صحة الصيغة."); }
 }
 </script>
 </body>
