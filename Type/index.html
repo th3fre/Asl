@@ -2,14 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASL GEN Core Tool</title>
     <style>
-        body { background: #0d1117; color: white; font-family: sans-serif; padding: 15px; }
-        .box { background: #161b22; padding: 15px; border-radius: 12px; max-width: 500px; margin: auto; border: 1px solid #30363d; }
+        body { background: #0d1117; color: white; font-family: sans-serif; padding: 10px; margin: 0; }
+        .box { background: #161b22; padding: 15px; border-radius: 12px; max-width: 100%; border: 1px solid #30363d; }
         textarea { width: 100%; height: 100px; background: #0d1117; color: #4caf50; border: 1px solid #30363d; padding: 10px; border-radius: 8px; box-sizing: border-box; }
         .row { background: #1e3d2b; padding: 8px; margin-top: 8px; border-radius: 6px; border-right: 4px solid #4caf50; }
         .lbl { font-size: 0.7em; color: #8b949e; }
-        .val { font-family: monospace; font-size: 0.9em; }
+        .val { font-family: monospace; font-size: 0.9em; word-break: break-all; }
         button { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 6px; background: #4caf50; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -17,21 +18,23 @@
 
 <div class="box">
     <h2 style="color:#4caf50; text-align:center;">ASL GEN Core Tool</h2>
-    <textarea id="in" placeholder="الصق الرابط (vmess / vless / json)..."></textarea>
-    <button onclick="analyze()">تحليل البيانات الأساسية</button>
+    <textarea id="in" placeholder="الصق الرابط (vmess / vless)..."></textarea>
+    <button onclick="analyze()">تحليل وفحص الحالة</button>
 
     <div id="out" style="margin-top:20px; display:none;">
-        <div class="row"><div class="lbl">Server Type (نوع السيرفر)</div><div id="oType" class="val">--</div></div>
-        <div class="row"><div class="lbl">Address (العنوان)</div><div id="oAddr" class="val">--</div></div>
-        <div class="row"><div class="lbl">Port (المنفذ)</div><div id="oPort" class="val">--</div></div>
-        <div class="row"><div class="lbl">UUID (معرف المستخدم)</div><div id="oUuid" class="val">--</div></div>
-        <div class="row"><div class="lbl">Path / ServiceName</div><div id="oPath" class="val">--</div></div>
+        <div class="row"><div class="lbl">Server Type</div><div id="oType" class="val">--</div></div>
+        <div class="row"><div class="lbl">Address</div><div id="oAddr" class="val">--</div></div>
+        <div class="row"><div class="lbl">Port</div><div id="oPort" class="val">--</div></div>
+        <div class="row"><div class="lbl">UUID</div><div id="oUuid" class="val">--</div></div>
+        <div class="row"><div class="lbl">Path</div><div id="oPath" class="val">--</div></div>
         <div class="row"><div class="lbl">SNI / Host</div><div id="oSni" class="val">--</div></div>
+        <div class="row"><div class="lbl">شركة السيرفر (ISP)</div><div id="oIsp" class="val">--</div></div>
+        <div class="row"><div class="lbl">الحالة (Status)</div><div id="oStatus" class="val">--</div></div>
     </div>
 </div>
 
 <script>
-function analyze() {
+async function analyze() {
     let raw = document.getElementById('in').value.trim();
     let data = { type: "Normal", add: "--", port: "--", uuid: "--", path: "/", sni: "--" };
     try {
@@ -47,6 +50,7 @@ function analyze() {
             data.path = url.searchParams.get("path") || "/";
             data.sni = url.searchParams.get("sni") || url.searchParams.get("host") || "--";
         }
+        
         document.getElementById('out').style.display = "block";
         document.getElementById('oType').innerText = data.type;
         document.getElementById('oAddr').innerText = data.add;
@@ -54,6 +58,24 @@ function analyze() {
         document.getElementById('oUuid').innerText = data.uuid;
         document.getElementById('oPath').innerText = data.path;
         document.getElementById('oSni').innerText = data.sni;
+
+        // جلب مزود الخدمة
+        fetch(`https://ip-api.com/json/${data.add}?fields=isp`)
+            .then(res => res.json())
+            .then(json => document.getElementById('oIsp').innerText = json.isp || "غير معروف");
+
+        // فحص الحالة
+        document.getElementById('oStatus').innerText = "جاري الفحص...";
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        try {
+            await fetch(`https://${data.add}:${data.port}`, { mode: 'no-cors', signal: controller.signal });
+            document.getElementById('oStatus').innerText = "شغال (Online)";
+        } catch (e) {
+            document.getElementById('oStatus').innerText = "متوقف (Offline)";
+        }
+        clearTimeout(timeoutId);
     } catch(e) { alert("خطأ في تحليل الرابط!"); }
 }
 </script>
