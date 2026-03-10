@@ -5,16 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASL GEN Master Tool</title>
     <style>
-        :root {
-            --app-green: #1e3d2b; 
-            --app-light-green: #4caf50; 
-            --bg-dark: #0d1117; 
-            --card-bg: #161b22; 
-            --text-gray: #8b949e;
-            --white: #ffffff;
-            --border: #30363d;
-            --info-color: #58a6ff;
-        }
+        :root { --app-green: #1e3d2b; --app-light-green: #4caf50; --bg-dark: #0d1117; --card-bg: #161b22; --text-gray: #8b949e; --white: #ffffff; --border: #30363d; --info-color: #58a6ff; }
         body { background-color: var(--bg-dark); color: var(--white); font-family: sans-serif; padding: 15px; display: flex; justify-content: center; margin: 0; }
         .box { background-color: var(--card-bg); padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid var(--border); }
         h2 { text-align: center; color: var(--app-light-green); font-size: 1.5em; }
@@ -30,68 +21,68 @@
 
 <div class="box">
     <h2>ASL GEN Master Tool</h2>
-    <textarea id="in" placeholder="الصق الرابط هنا (vmess / vless)..."></textarea>
+    <textarea id="in" placeholder="الصق الرابط هنا..."></textarea>
     <div style="display:flex; justify-content:space-between;">
         <button class="btn-g" onclick="analyze()">تحليل</button>
         <button class="btn-g" style="background:#238636;" onclick="copyAll()">نسخ الكل</button>
     </div>
 
     <div id="out" style="margin-top:20px; display:none;">
-        <div class="row"><div class="lbl">Server Type</div><div id="oType" class="val">--</div></div>
+        <div class="row"><div class="lbl">نوع الاتصال</div><div id="oType" class="val">--</div></div>
         <div class="row"><button class="copy-btn" onclick="copy('oAddr')">نسخ</button><div class="lbl">Address</div><div id="oAddr" class="val">--</div></div>
         <div class="row"><button class="copy-btn" onclick="copy('oPort')">نسخ</button><div class="lbl">Port</div><div id="oPort" class="val">--</div></div>
-        <div class="row"><button class="copy-btn" onclick="copy('oUuid')">نسخ</button><div class="lbl">UUID</div><div id="oUuid" class="val">--</div></div>
+        <div class="row"><button class="copy-btn" onclick="copy('oUuid')">نسخ</button><div class="lbl">UUID / User</div><div id="oUuid" class="val">--</div></div>
         <div class="row"><button class="copy-btn" onclick="copy('oPath')">نسخ</button><div class="lbl">Path</div><div id="oPath" class="val">--</div></div>
         <div class="row"><button class="copy-btn" onclick="copy('oSni')">نسخ</button><div class="lbl">SNI / Host</div><div id="oSni" class="val">--</div></div>
-        <div class="row"><div class="lbl">ISP (الشركة المزودة)</div><div id="oIsp" class="val">--</div></div>
-        <div class="row"><div class="lbl">Status (ملاحظة الفحص)</div><div id="oStatus" class="val" style="color: var(--info-color);">--</div></div>
+        <div class="row"><div class="lbl">ISP (المزود)</div><div id="oIsp" class="val">--</div></div>
+        <div class="row"><div class="lbl">Status / تنبيه</div><div id="oStatus" class="val" style="color:var(--info-color)">--</div></div>
     </div>
 </div>
 
 <script>
 function copy(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); }
 function copyAll() {
-    let text = `Type: ${document.getElementById('oType').innerText}\nAddr: ${document.getElementById('oAddr').innerText}\nPort: ${document.getElementById('oPort').innerText}\nUUID: ${document.getElementById('oUuid').innerText}\nPath: ${document.getElementById('oPath').innerText}\nSNI: ${document.getElementById('oSni').innerText}`;
-    navigator.clipboard.writeText(text); alert("تم نسخ البيانات!");
+    let fields = ['oType', 'oAddr', 'oPort', 'oUuid', 'oPath', 'oSni'];
+    let text = fields.map(f => `${f.replace('o','')}: ${document.getElementById(f).innerText}`).join('\n');
+    navigator.clipboard.writeText(text); alert("تم النسخ!");
 }
 
 async function analyze() {
     let raw = document.getElementById('in').value.trim();
-    let data = { add: "--", port: "--", uuid: "--", path: "/", sni: "--", type: "NORMAL" };
-    try {
-        if (raw.startsWith('vmess://')) {
-            let json = JSON.parse(atob(raw.replace('vmess://', '')));
-            data.add = json.add; data.port = json.port; data.uuid = json.id; data.path = json.path || "/";
-            data.sni = json.sni || json.host || "--";
-            data.type = json.net === "grpc" ? "GRPC" : (json.tls === "tls" ? "CDN" : "NORMAL");
-        } else if (raw.startsWith('vless://')) {
-            let urlPart = raw.replace('vless://', '');
-            let [userPart, hostPart] = urlPart.split('@');
-            let [addr, pathPart] = hostPart.split('?');
-            let [host, port] = addr.split(':');
-            data.uuid = userPart; data.add = host; data.port = port;
-            let searchParams = new URLSearchParams(pathPart);
-            data.path = searchParams.get("path") || "/";
-            data.sni = searchParams.get("sni") || searchParams.get("host") || "--";
-            data.type = searchParams.get("type") === "grpc" ? "GRPC" : "CDN";
-        }
-        
-        document.getElementById('out').style.display = "block";
-        document.getElementById('oType').innerText = data.type;
-        document.getElementById('oAddr').innerText = data.add;
-        document.getElementById('oPort').innerText = data.port;
-        document.getElementById('oUuid').innerText = data.uuid;
-        document.getElementById('oPath').innerText = data.path;
-        document.getElementById('oSni').innerText = data.sni;
-        
-        // تحديث رسالة الحالة لتعكس طبيعة السيرفرات المشفرة
-        document.getElementById('oStatus').innerText = "هذا النوع من السيرفرات (Reality/VLESS) لا يدعم الفحص عبر المتصفح.";
+    let data = { type: "--", add: "--", port: "--", uuid: "--", path: "/", sni: "--" };
+    
+    document.getElementById('out').style.display = "block";
+    
+    if (raw.startsWith('vmess://') || raw.startsWith('vless://')) {
+        try {
+            if (raw.startsWith('vmess://')) {
+                let json = JSON.parse(atob(raw.replace('vmess://', '')));
+                data.type = "VMESS"; data.add = json.add; data.port = json.port; data.uuid = json.id; 
+                data.path = json.path || "/"; data.sni = json.sni || json.host || "--";
+            } else {
+                let url = new URL(raw.replace('vless://', 'http://'));
+                data.type = "VLESS"; data.add = url.hostname; data.port = url.port || "443"; 
+                data.uuid = url.username; data.path = url.searchParams.get("path") || "/";
+                data.sni = url.searchParams.get("sni") || url.searchParams.get("host") || "--";
+            }
+            document.getElementById('oStatus').innerText = data.type === "VLESS" ? "قد لا يدعم الفحص عبر المتصفح (Reality)." : "تم التحليل.";
+        } catch(e) { alert("خطأ في تحليل الرابط!"); return; }
+    } else {
+        data.type = "Website/Domain";
+        data.add = raw.replace(/^https?:\/\//, '').split('/')[0];
+        document.getElementById('oStatus').innerText = "تم تحليل النطاق بنجاح.";
+    }
 
-        fetch(`https://ip-api.com/json/${data.add}?fields=isp`)
-            .then(res => res.json())
-            .then(json => document.getElementById('oIsp').innerText = json.isp || "غير معروف");
+    document.getElementById('oType').innerText = data.type;
+    document.getElementById('oAddr').innerText = data.add;
+    document.getElementById('oPort').innerText = data.port;
+    document.getElementById('oUuid').innerText = data.uuid;
+    document.getElementById('oPath').innerText = data.path;
+    document.getElementById('oSni').innerText = data.sni;
 
-    } catch(e) { alert("خطأ في تحليل الرابط! تأكد من صحة الصيغة."); }
+    fetch(`https://ip-api.com/json/${data.add}?fields=isp`)
+        .then(res => res.json())
+        .then(json => document.getElementById('oIsp').innerText = json.isp || "غير معروف");
 }
 </script>
 </body>
