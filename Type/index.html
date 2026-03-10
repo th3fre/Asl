@@ -35,12 +35,28 @@
         <div class="row"><button class="copy-btn" onclick="copy('oPath')">نسخ</button><div class="lbl">Path</div><div id="oPath" class="val">--</div></div>
         <div class="row"><button class="copy-btn" onclick="copy('oSni')">نسخ</button><div class="lbl">SNI / Host</div><div id="oSni" class="val">--</div></div>
         <div class="row"><div class="lbl">ISP (المزود)</div><div id="oIsp" class="val">--</div></div>
-        <div class="row"><div class="lbl">Status / تنبيه</div><div id="oStatus" class="val" style="color:var(--info-color)">--</div></div>
+        <div class="row">
+            <div class="lbl">حالة السيرفر</div>
+            <div id="oStatus" class="val">--</div>
+            <button class="copy-btn" style="background:#58a6ff;" onclick="checkPort()">فحص خارجي</button>
+        </div>
     </div>
 </div>
 
 <script>
+let currentAddr = "";
+let currentPort = "";
+
 function copy(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); }
+
+function checkPort() {
+    if (currentAddr !== "--" && currentPort !== "--") {
+        window.open(`https://ping.eu/port-chk/?host=${currentAddr}&port=${currentPort}`, '_blank');
+    } else {
+        alert("يرجى تحليل رابط أولاً!");
+    }
+}
+
 function copyAll() {
     let fields = ['oType', 'oAddr', 'oPort', 'oUuid', 'oPath', 'oSni'];
     let text = fields.map(f => `${f.replace('o','')}: ${document.getElementById(f).innerText}`).join('\n');
@@ -50,11 +66,10 @@ function copyAll() {
 async function analyze() {
     let raw = document.getElementById('in').value.trim();
     let data = { type: "--", add: "--", port: "--", uuid: "--", path: "/", sni: "--" };
-    
     document.getElementById('out').style.display = "block";
     
-    if (raw.startsWith('vmess://') || raw.startsWith('vless://')) {
-        try {
+    try {
+        if (raw.startsWith('vmess://') || raw.startsWith('vless://')) {
             if (raw.startsWith('vmess://')) {
                 let json = JSON.parse(atob(raw.replace('vmess://', '')));
                 data.type = "VMESS"; data.add = json.add; data.port = json.port; data.uuid = json.id; 
@@ -65,24 +80,26 @@ async function analyze() {
                 data.uuid = url.username; data.path = url.searchParams.get("path") || "/";
                 data.sni = url.searchParams.get("sni") || url.searchParams.get("host") || "--";
             }
-            document.getElementById('oStatus').innerText = data.type === "VLESS" ? "قد لا يدعم الفحص عبر المتصفح (Reality)." : "تم التحليل.";
-        } catch(e) { alert("خطأ في تحليل الرابط!"); return; }
-    } else {
-        data.type = "Website/Domain";
-        data.add = raw.replace(/^https?:\/\//, '').split('/')[0];
-        document.getElementById('oStatus').innerText = "تم تحليل النطاق بنجاح.";
-    }
+        } else {
+            data.type = "Website/Domain";
+            data.add = raw.replace(/^https?:\/\//, '').split('/')[0];
+        }
+        
+        currentAddr = data.add;
+        currentPort = data.port;
 
-    document.getElementById('oType').innerText = data.type;
-    document.getElementById('oAddr').innerText = data.add;
-    document.getElementById('oPort').innerText = data.port;
-    document.getElementById('oUuid').innerText = data.uuid;
-    document.getElementById('oPath').innerText = data.path;
-    document.getElementById('oSni').innerText = data.sni;
+        document.getElementById('oType').innerText = data.type;
+        document.getElementById('oAddr').innerText = data.add;
+        document.getElementById('oPort').innerText = data.port;
+        document.getElementById('oUuid').innerText = data.uuid;
+        document.getElementById('oPath').innerText = data.path;
+        document.getElementById('oSni').innerText = data.sni;
+        document.getElementById('oStatus').innerText = "اضغط 'فحص خارجي' للتحقق الدقيق";
 
-    fetch(`https://ip-api.com/json/${data.add}?fields=isp`)
-        .then(res => res.json())
-        .then(json => document.getElementById('oIsp').innerText = json.isp || "غير معروف");
+        fetch(`https://ip-api.com/json/${data.add}?fields=isp`)
+            .then(res => res.json())
+            .then(json => document.getElementById('oIsp').innerText = json.isp || "غير معروف");
+    } catch(e) { alert("خطأ في تحليل الرابط!"); }
 }
 </script>
 </body>
