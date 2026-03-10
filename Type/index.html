@@ -13,6 +13,7 @@
             --text-gray: #8b949e;
             --white: #ffffff;
             --border: #30363d;
+            --danger: #ff5555;
         }
         body { background-color: var(--bg-dark); color: var(--white); font-family: sans-serif; padding: 15px; display: flex; justify-content: center; margin: 0; }
         .box { background-color: var(--card-bg); padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid var(--border); }
@@ -43,6 +44,7 @@
         <div class="row"><button class="copy-btn" onclick="copy('oPath')">نسخ</button><div class="lbl">Path</div><div id="oPath" class="val">--</div></div>
         <div class="row"><button class="copy-btn" onclick="copy('oSni')">نسخ</button><div class="lbl">SNI / Host</div><div id="oSni" class="val">--</div></div>
         <div class="row"><div class="lbl">ISP (الشركة المزودة)</div><div id="oIsp" class="val">--</div></div>
+        <div class="row"><div class="lbl">Status (حالة السيرفر)</div><div id="oStatus" class="val">--</div></div>
     </div>
 </div>
 
@@ -81,94 +83,28 @@ async function analyze() {
         document.getElementById('oUuid').innerText = data.uuid;
         document.getElementById('oPath').innerText = data.path;
         document.getElementById('oSni').innerText = data.sni;
+        document.getElementById('oStatus').innerText = "جاري الفحص...";
 
-        let res = await fetch(`https://ip-api.com/json/${data.add}?fields=isp`);
-        let json = await res.json();
-        document.getElementById('oIsp').innerText = json.isp || "غير معروف";
-    } catch(e) { alert("خطأ في تحليل الرابط!"); }
-}
-</script>
-</body>
-</html>            background-color: var(--bg-dark); 
-            color: var(--app-light-green); 
-            border: 1px solid var(--border); 
-            padding: 10px; border-radius: 8px; box-sizing: border-box; 
-            font-family: monospace; font-size: 0.9em;
-        }
-        .row { 
-            background-color: var(--app-green); 
-            padding: 10px; margin-top: 10px; border-radius: 8px; 
-            border-right: 4px solid var(--app-light-green); position: relative; 
-        }
-        .lbl { font-size: 0.7em; color: var(--text-gray); }
-        .val { font-family: monospace; font-size: 0.9em; word-break: break-all; margin-top: 2px; }
-        .btn-g { 
-            width: 48%; padding: 12px; border: none; border-radius: 8px; 
-            color: var(--white); font-weight: bold; cursor: pointer; margin-top: 10px; 
-            background-color: var(--app-light-green); 
-        }
-        .copy-btn { 
-            position: absolute; right: 10px; top: 10px; font-size: 0.7em; 
-            background: rgba(0,0,0,0.3); border: 1px solid var(--border); 
-            color: var(--white); padding: 3px 6px; border-radius: 4px; cursor: pointer;
-        }
-    </style>
-</head>
-<body>
+        // جلب مزود الخدمة
+        fetch(`https://ip-api.com/json/${data.add}?fields=isp`)
+            .then(res => res.json())
+            .then(json => document.getElementById('oIsp').innerText = json.isp || "غير معروف");
 
-<div class="box">
-    <h2>ASL GEN Master Tool</h2>
-    <textarea id="in" placeholder="الصق الرابط هنا (vmess / vless)..."></textarea>
-    <div style="display:flex; justify-content:space-between;">
-        <button class="btn-g" onclick="analyze()">تحليل</button>
-        <button class="btn-g" style="background:#238636;" onclick="copyAll()">نسخ الكل</button>
-    </div>
-
-    <div id="out" style="margin-top:20px; display:none;">
-        <div class="row"><div class="lbl">Server Type</div><div id="oType" class="val">--</div></div>
-        <div class="row"><button class="copy-btn" onclick="copy('oAddr')">نسخ</button><div class="lbl">Address</div><div id="oAddr" class="val">--</div></div>
-        <div class="row"><button class="copy-btn" onclick="copy('oUuid')">نسخ</button><div class="lbl">UUID</div><div id="oUuid" class="val">--</div></div>
-        <div class="row"><button class="copy-btn" onclick="copy('oPath')">نسخ</button><div class="lbl">Path</div><div id="oPath" class="val">--</div></div>
-        <div class="row"><button class="copy-btn" onclick="copy('oSni')">نسخ</button><div class="lbl">SNI / Host</div><div id="oSni" class="val">--</div></div>
-        <div class="row"><div class="lbl">ISP (الشركة المزودة)</div><div id="oIsp" class="val">--</div></div>
-    </div>
-</div>
-
-<script>
-function copy(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); }
-function copyAll() {
-    let text = `Type: ${document.getElementById('oType').innerText}\nAddr: ${document.getElementById('oAddr').innerText}\nUUID: ${document.getElementById('oUuid').innerText}\nPath: ${document.getElementById('oPath').innerText}\nSNI: ${document.getElementById('oSni').innerText}`;
-    navigator.clipboard.writeText(text); alert("تم نسخ البيانات!");
-}
-
-async function analyze() {
-    let raw = document.getElementById('in').value.trim();
-    let data = { add: "--", uuid: "--", path: "/", sni: "--", type: "NORMAL" };
-    try {
-        if (raw.startsWith('vmess://')) {
-            let json = JSON.parse(atob(raw.replace('vmess://', '')));
-            data.add = json.add; data.uuid = json.id; data.path = json.path || "/";
-            data.sni = json.sni || json.host || "--";
-            data.type = json.net === "grpc" ? "GRPC" : (json.tls === "tls" ? "CDN" : "NORMAL");
-        } else if (raw.startsWith('vless://')) {
-            let url = new URL(raw.replace('vless://', 'http://'));
-            data.add = url.hostname; data.uuid = url.username;
-            data.path = url.searchParams.get("path") || "/";
-            data.sni = url.searchParams.get("sni") || url.searchParams.get("host") || "--";
-            data.type = url.searchParams.get("type") === "grpc" ? "GRPC" : "CDN";
-        }
+        // فحص حالة السيرفر
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         
-        document.getElementById('out').style.display = "block";
-        document.getElementById('oType').innerText = data.type;
-        document.getElementById('oAddr').innerText = data.add;
-        document.getElementById('oUuid').innerText = data.uuid;
-        document.getElementById('oPath').innerText = data.path;
-        document.getElementById('oSni').innerText = data.sni;
+        fetch(`https://${data.add}:${data.port}`, { mode: 'no-cors', signal: controller.signal })
+            .then(() => {
+                document.getElementById('oStatus').innerText = "✅ شغال (Online)";
+                document.getElementById('oStatus').style.color = "#4caf50";
+            })
+            .catch(() => {
+                document.getElementById('oStatus').innerText = "❌ متوقف أو محجوب (Offline)";
+                document.getElementById('oStatus').style.color = "#ff5555";
+            });
 
-        let res = await fetch(`http://ip-api.com/json/${data.add}?fields=isp`);
-        let json = await res.json();
-        document.getElementById('oIsp').innerText = json.isp || "غير معروف";
-    } catch(e) { alert("خطأ في الرابط!"); }
+    } catch(e) { alert("خطأ في تحليل الرابط!"); }
 }
 </script>
 </body>
