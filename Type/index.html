@@ -2,64 +2,51 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>ASL GEN Master Tool</title>
+    <title>ASL GEN Core Tool</title>
     <style>
-        :root { --app-green: #1e3d2b; --app-light-green: #4caf50; --bg-dark: #0d1117; --card-bg: #161b22; --text-gray: #8b949e; --white: #ffffff; }
-        body { background-color: var(--bg-dark); color: var(--white); font-family: sans-serif; padding: 15px; }
-        .box { background-color: var(--card-bg); padding: 15px; border-radius: 12px; max-width: 500px; margin: auto; border: 1px solid #30363d; }
-        textarea { width: 100%; height: 80px; background: #0d1117; color: #4caf50; border: 1px solid #30363d; padding: 10px; border-radius: 8px; box-sizing: border-box; }
-        .row { background: var(--app-green); padding: 8px; margin-top: 8px; border-radius: 6px; border-right: 4px solid var(--app-light-green); }
-        .lbl { font-size: 0.7em; color: var(--text-gray); }
-        .val { font-family: monospace; font-size: 0.9em; word-break: break-all; }
-        button { width: 48%; padding: 10px; margin-top: 10px; border: none; border-radius: 6px; background: var(--app-light-green); color: white; cursor: pointer; }
+        body { background: #0d1117; color: white; font-family: sans-serif; padding: 15px; }
+        .box { background: #161b22; padding: 15px; border-radius: 12px; max-width: 500px; margin: auto; border: 1px solid #30363d; }
+        textarea { width: 100%; height: 100px; background: #0d1117; color: #4caf50; border: 1px solid #30363d; padding: 10px; border-radius: 8px; box-sizing: border-box; }
+        .row { background: #1e3d2b; padding: 8px; margin-top: 8px; border-radius: 6px; border-right: 4px solid #4caf50; }
+        .lbl { font-size: 0.7em; color: #8b949e; }
+        .val { font-family: monospace; font-size: 0.9em; }
+        button { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 6px; background: #4caf50; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2 style="color:var(--app-light-green); text-align:center;">ASL GEN Master Tool</h2>
+    <h2 style="color:#4caf50; text-align:center;">ASL GEN Core Tool</h2>
     <textarea id="in" placeholder="الصق الرابط (vmess / vless / json)..."></textarea>
-    <div style="display:flex; justify-content:space-between;">
-        <button onclick="analyze()">تحليل</button>
-        <button style="background:#58a6ff;" onclick="check()">فحص المنفذ</button>
-    </div>
+    <button onclick="analyze()">تحليل البيانات الأساسية</button>
 
     <div id="out" style="margin-top:20px; display:none;">
-        <div class="row"><div class="lbl">نوع السيرفر (Server Type)</div><div id="oType" class="val" style="color:#ffcc00; font-weight:bold;">--</div></div>
-        <div class="row"><div class="lbl">Address</div><div id="oAddr" class="val">--</div></div>
-        <div class="row"><div class="lbl">Port</div><div id="oPort" class="val">--</div></div>
-        <div class="row"><div class="lbl">UUID</div><div id="oUuid" class="val">--</div></div>
-        <div class="row"><div class="lbl">Path</div><div id="oPath" class="val">--</div></div>
-        <div class="row"><div class="lbl">SNI</div><div id="oSni" class="val">--</div></div>
+        <div class="row"><div class="lbl">Server Type (نوع السيرفر)</div><div id="oType" class="val">--</div></div>
+        <div class="row"><div class="lbl">Address (العنوان)</div><div id="oAddr" class="val">--</div></div>
+        <div class="row"><div class="lbl">Port (المنفذ)</div><div id="oPort" class="val">--</div></div>
+        <div class="row"><div class="lbl">UUID (معرف المستخدم)</div><div id="oUuid" class="val">--</div></div>
+        <div class="row"><div class="lbl">Path / ServiceName</div><div id="oPath" class="val">--</div></div>
+        <div class="row"><div class="lbl">SNI / Host</div><div id="oSni" class="val">--</div></div>
     </div>
 </div>
 
 <script>
-let currentAddr = "", currentPort = "";
-
-function check() { if(currentAddr) window.open(`https://ping.eu/port-chk/?host=${currentAddr}&port=${currentPort}`, '_blank'); }
-
 function analyze() {
     let raw = document.getElementById('in').value.trim();
     let data = { type: "Normal", add: "--", port: "--", uuid: "--", path: "/", sni: "--" };
     try {
-        let json;
         if (raw.startsWith('vmess://')) {
-            json = JSON.parse(atob(raw.replace('vmess://', '')));
+            let json = JSON.parse(atob(raw.replace('vmess://', '')));
+            data.type = json.net === "grpc" ? "GRPC" : (json.tls === "tls" ? "CDN" : "Normal");
             data.add = json.add; data.port = json.port; data.uuid = json.id;
             data.path = json.path || "/"; data.sni = json.sni || json.host || "--";
-            // تحديد النوع حسب الصورة
-            data.type = json.net === "grpc" ? "GRPC" : (json.tls === "tls" ? "CDN" : "Normal");
         } else if (raw.startsWith('vless://')) {
             let url = new URL(raw.replace('vless://', 'http://'));
+            data.type = url.searchParams.get("type") === "grpc" ? "GRPC" : "Normal";
             data.add = url.hostname; data.port = url.port || "443"; data.uuid = url.username;
             data.path = url.searchParams.get("path") || "/";
             data.sni = url.searchParams.get("sni") || url.searchParams.get("host") || "--";
-            // تحديد النوع حسب الصورة
-            data.type = url.searchParams.get("type") === "grpc" ? "GRPC" : (url.searchParams.get("security") === "reality" ? "Normal" : "CDN");
         }
-        
-        currentAddr = data.add; currentPort = data.port;
         document.getElementById('out').style.display = "block";
         document.getElementById('oType').innerText = data.type;
         document.getElementById('oAddr').innerText = data.add;
@@ -67,7 +54,7 @@ function analyze() {
         document.getElementById('oUuid').innerText = data.uuid;
         document.getElementById('oPath').innerText = data.path;
         document.getElementById('oSni').innerText = data.sni;
-    } catch(e) { alert("رابط غير صالح!"); }
+    } catch(e) { alert("خطأ في تحليل الرابط!"); }
 }
 </script>
 </body>
